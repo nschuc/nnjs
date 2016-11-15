@@ -32,6 +32,8 @@
     ]
   },
   "dependencies": {
+    "escodegen": "^1.8.1",
+    "esprima": "^3.1.1",
     "weblas": "^0.9.0"
   }
 }
