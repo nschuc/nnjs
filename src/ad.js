@@ -1,8 +1,4 @@
 import fwd from './fwd';
+import rev from './rev';
 
-const ad = (fn) => {
-  const dual_fn = fwd(fn);
-  return dual_fn;
-}
-
-export default ad
+export {fwd, rev}

@@ -1,6 +1,8 @@
 import * as esprima from 'esprima';
 import * as escodegen from 'escodegen';
 
+import { traverse, createCallSite, injectOps } from './utils';
+
 const getOpAst = (op) => {
   const str = op.toString();
   const ast = esprima.parse(str);
@@ -27,61 +29,16 @@ const opFuncs = {
     ]},
 }
 
-const createCallSite = (callee, ...args) => {
-  return {
-    "type": "CallExpression",
-    "callee": {
-      "type": "Identifier",
-      "name": callee
-    },
-    "arguments": [ ...args, ]
-  }
-}
-
-const injectOps = (ast, ops) => {
-  let functionBody = Array.isArray(ast.body[0].body.body) ? ast.body[0].body.body : [ ast.body[0].body.body ];
-  let opAsts = Object.keys(ops).map(name => getOpAst(ops[name]));
-  ast.body[0].body.body = [...opAsts, ...functionBody];
-}
-
-const getIdentifiers = (node, identifiers = new Set()) => {
-  for(const key in node) {
-    if(node.hasOwnProperty(key)) {
-      const child = node[key];
-      if(child && typeof child === 'object') {
-        if(Array.isArray(child)) {
-          child.forEach((node) => getIdentifiers(node, identifiers));
-        }
-        else {
-          getIdentifiers(child, identifiers);
-        }
-        if(child.type === 'Identifier') {
-          identifiers.add(child.name, identifiers)
-        }
-      }
+const getIdentifiers = (ast) => {
+  let identifiers = new Set();
+  traverse(ast, {
+    Identifier: (node, state) => {
+      state.identifiers.add(node.name, identifiers)
     }
-  }
-  return identifiers
-}
-
-const traverse = (node, opNames) => {
-  for(const key in node) {
-    if(node.hasOwnProperty(key)) {
-      const child = node[key];
-      if(child && typeof child === 'object') {
-        if(Array.isArray(child)) {
-          child.forEach((node) => traverse(node, opNames));
-        }
-        else {
-          traverse(child, opNames);
-        }
-        if(child.type === 'BinaryExpression') {
-          const opNode = createCallSite(opNames[child.operator], child.left, child.right);
-          node[key] = opNode;
-        }
-      }
-    }
-  }
+  }, {
+    identifiers
+  });
+  return identifiers;
 }
 
 const fwd = (fn) => {
@@ -89,16 +46,21 @@ const fwd = (fn) => {
     throw 'nice try buddy'
   }
 
-  // COnstruct ast
+  // Construct ast
   const fnString = fn.toString();
   var ast = esprima.parse(fnString);
 
   // inject operator overloads
-  let identifiers = getIdentifiers(ast);
 
   traverse(ast, {
-    '*': 'mult',
-    '+': 'add'
+    BinaryExpression: (node, state) => {
+      const opNames = {
+        '*': 'mult',
+        '+': 'add'
+      }
+      const opNode = createCallSite(opNames[node.operator], node.left, node.right);
+      return opNode;
+    }
   })
 
   injectOps(ast, opFuncs);
