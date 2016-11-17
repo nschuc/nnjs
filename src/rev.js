@@ -102,11 +102,23 @@ const rev = (fn) => {
     params = ast.body[0].params.map(i => i.name);
 
   params.forEach(p => {
-    graph[p] = { op: 'input', id: p, in_edges: [], out_edges: [] }
+    graph[p] = { op: 'input', dv: 0, id: p, in_edges: [], out_edges: [] }
   });
 
   traverse(ast, {
-    BinaryExpression: addToGraph
+    BinaryExpression: addToGraph,
+    Literal: (node, graph) => {
+      const id = getId(graph, 'literal');
+      graph[id] = {
+        op: 'literal',
+        name: id,
+        val: node.value,
+        dv: 0,
+        in_edges: [],
+        out_edges: [],
+      }
+      return graph[id]
+    }
   }, graph);
 
   const opOrdering = topologicalSort(graph).reverse();
@@ -119,7 +131,11 @@ const rev = (fn) => {
     execGraphFwd(opOrdering, opFuncs, graph);
 
     const outputs = getOutputs(graph);
-    outputs.forEach( o => graph[o].dv = 1 )
+    outputs.forEach( o => {
+      if(graph[o].op !== 'literal' 
+          && graph[o].op !== 'input')
+        graph[o].dv = 1
+    })
     execGraphRev(opOrdering.reverse(), dfFuncs, graph);
     let derivatives = {}
     params.forEach(p => derivatives[p] = graph[p].dv);

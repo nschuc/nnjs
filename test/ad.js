@@ -19,6 +19,24 @@ test('ad on f(x) = 2*x*x + 1', t => {
   t.is(dual[1], df(x), 'Derivative is properly computed');
 })
 
+test('reverse mode constant', t => {
+  const f = (x) => 2;
+  const df = (x, y) => ({x : 0});
+
+  const x = 3
+  let res = rev(f)(x);
+  t.deepEqual(res, df(x), 'Derivative is properly computed');
+})
+
+test('reverse mode with constant literals', t => {
+  const f = (x) => x*x + 5*x + 6;
+  const df = (x) => ({x : 2*x + 5});
+
+  const x = 3
+  let res = rev(f)(x);
+  t.deepEqual(res, df(x), 'Derivative is properly computed');
+})
+
 test('reverse mode f(x, y) = x^2 + y^2', t => {
   const f = (x, y) => 2*x*x + y*y;
   const df = (x, y) => ({x: 4*x, y: 2*y});
