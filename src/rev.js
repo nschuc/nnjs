@@ -52,34 +52,17 @@ const opFuncs = {
 
 const dfFuncs = {
   'input': () => {},
-  '*': (deps, wrt) => {
-    if(deps.every(d => d.id === wrt)) {
-      return deps[0].val;
-    }
-    return deps
-      .filter(d => d.id !== wrt)
-      .map(d => d.val)
-      .reduce((a, b) => a+b, 0);
+  '*': (a, b, wrt) => {
+    if(a.id === wrt) return b.val;
+    else return b.val;
   },
-  '+': (deps, wrt) => {
-    if(deps.every(d => d.id === wrt)) {
-      return 1;
-    }
-    return deps
-      .filter(d => d.id === wrt)
-      .map(a => 1)
-      .reduce((a, b) => a+b, 0);
+  '+': (a, b, wrt) => {
+    return 1;
   },
-  '-': (a, b) => {
-    if(deps.every(d => d.id === wrt)) {
-      return -1;
-    }
-    return deps
-      .filter(d => d.id === wrt)
-      .map(a => -1)
-      .reduce((a, b) => a+b, 0);
-  },
-
+  '-': (a, b, wrt) => {
+    if(a.id === wrt) return 1
+    else return -1;
+  }
 }
 
 const execGraphFwd = (order, ops, graph) => {
@@ -93,13 +76,11 @@ const execGraphFwd = (order, ops, graph) => {
 const execGraphRev = (order, ops, graph) => {
   order.forEach( i => {
     graph[i].in_edges.forEach( j => {
-      graph[j].dv = graph[j].dv || 0; // initialize
-
-      const { op, dv} = graph[i];
-      const didj = dfFuncs[op](
-          graph[i].in_edges.map(i => graph[i]), j
-          );
-      graph[j].dv += didj * graph[i].dv;
+      graph[j].dv = graph[j].dv || 0;
+      const { op, dv, in_edges } = graph[i];
+      const deps = in_edges.map(i => graph[i]);
+      const didj = dfFuncs[op];
+      graph[j].dv += didj(...deps, j) * graph[i].dv;
     });
   });
 }

@@ -28,11 +28,28 @@ test('reverse mode f(x, y) = x^2 + y^2', t => {
   t.deepEqual(res, df(x, y), 'Derivative is properly computed');
 })
 
-test('reverse mode f(x, y)', t => {
+test('reverse mode f(x, y) = yx^2 + y^2', t => {
   const f = (x, y) => x*x*y + y*y;
   const df = (x, y) => [2*x*y, x*x + 2*y];
 
   const x = 3, y = 4;
   let res = rev(f)(x, y);
   t.deepEqual(res, df(x, y), 'Derivative is properly computed');
+})
+
+test.only('reverse mode f(x, y) = productivity', t => {
+  const f = (
+      sleep,
+      caffeines,
+      friends
+      ) => {
+    return sleep + caffeines - friends*friends
+  }
+  const df = (s, c, f) => [
+    1, 1, - 2*f
+  ];
+
+  const sleep = 8, caffeines = 2, friends = 60;
+  let res = rev(f)(sleep, caffeines, friends);
+  t.deepEqual(res, df(sleep, caffeines, friends), 'Derivative is properly computed');
 })
