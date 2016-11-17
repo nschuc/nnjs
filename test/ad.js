@@ -50,7 +50,7 @@ test('reverse mode f(x, y) = yx^2 + y^2', t => {
   const f = (x, y) => x*x*y + y*y;
   const df = (x, y) => ({ x: 2*x*y, y: x*x + 2*y });
 
-  const x = 3, y = 4;
+  const x = 0, y = 4;
   let res = rev(f)(x, y);
   t.deepEqual(res, df(x, y), 'Derivative is properly computed');
 })

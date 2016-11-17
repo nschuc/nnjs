@@ -4,7 +4,7 @@ module.exports = {
     path: './build',
     filename: 'index.bundle.js',
     libraryTarget: "var",
-    library: "nnjs"
+    library: "nn"
   },
   module: {
     loaders: [{

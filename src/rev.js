@@ -69,7 +69,7 @@ const execGraphFwd = (order, ops, graph) => {
   order.forEach( id => {
     const op = graph[id].op;
     const operands = graph[id].in_edges.map(id => graph[id].val);
-    graph[id].val = graph[id].val || ops[op](...operands);
+    graph[id].val = graph[id].val !== undefined ? graph[id].val : ops[op](...operands);
   });
 }
 
