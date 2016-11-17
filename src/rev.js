@@ -54,7 +54,7 @@ const dfFuncs = {
   'input': () => {},
   '*': (a, b, wrt) => {
     if(a.id === wrt) return b.val;
-    else return b.val;
+    else return a.val;
   },
   '+': (a, b, wrt) => {
     return 1;
@@ -95,7 +95,11 @@ const rev = (fn) => {
   var ast = esprima.parse(fnString);
 
   let graph = {};
-  const params = ast.body[0].params.map(i => i.name);
+  let params;
+  if(ast.body[0].type === 'ExpressionStatement')
+    params = ast.body[0].expression.params.map(i => i.name);
+  else
+    params = ast.body[0].params.map(i => i.name);
 
   params.forEach(p => {
     graph[p] = { op: 'input', id: p, in_edges: [], out_edges: [] }
@@ -117,7 +121,9 @@ const rev = (fn) => {
     const outputs = getOutputs(graph);
     outputs.forEach( o => graph[o].dv = 1 )
     execGraphRev(opOrdering.reverse(), dfFuncs, graph);
-    return params.map(p => graph[p].dv);
+    let derivatives = {}
+    params.forEach(p => derivatives[p] = graph[p].dv);
+    return derivatives
   };
 }
 

@@ -20,8 +20,8 @@ test('ad on f(x) = 2*x*x + 1', t => {
 })
 
 test('reverse mode f(x, y) = x^2 + y^2', t => {
-  const f = (x, y) => x*x + y*y;
-  const df = (x, y) => [2*x, 2*y];
+  const f = (x, y) => 2*x*x + y*y;
+  const df = (x, y) => ({x: 4*x, y: 2*y});
 
   const x = 3, y = 4;
   let res = rev(f)(x, y);
@@ -30,14 +30,14 @@ test('reverse mode f(x, y) = x^2 + y^2', t => {
 
 test('reverse mode f(x, y) = yx^2 + y^2', t => {
   const f = (x, y) => x*x*y + y*y;
-  const df = (x, y) => [2*x*y, x*x + 2*y];
+  const df = (x, y) => ({ x: 2*x*y, y: x*x + 2*y });
 
   const x = 3, y = 4;
   let res = rev(f)(x, y);
   t.deepEqual(res, df(x, y), 'Derivative is properly computed');
 })
 
-test.only('reverse mode f(x, y) = productivity', t => {
+test('reverse mode f(x, y) = productivity', t => {
   const f = (
       sleep,
       caffeines,
@@ -45,9 +45,9 @@ test.only('reverse mode f(x, y) = productivity', t => {
       ) => {
     return sleep + caffeines - friends*friends
   }
-  const df = (s, c, f) => [
-    1, 1, - 2*f
-  ];
+  const df = (s, c, f) => ({
+    sleep: 1, caffeines: 1, friends: - 2*f
+  });
 
   const sleep = 8, caffeines = 2, friends = 60;
   let res = rev(f)(sleep, caffeines, friends);
