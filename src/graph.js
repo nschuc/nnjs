@@ -66,6 +66,24 @@ export default class Graph {
 
 }
 
+const topologicalSort = (startNodes : Array<string>, graph: Map<string, Node>) => {
+  let sorted = [];
+  let visited = new Set();
+  let queue = startNodes;
+  while(queue.length) {
+    const front = queue.shift();
+    if(!visited.has(front)) { 
+      visited.add(front)
+      sorted.push(front);
+      const frontNode = graph.get(front);
+      if(frontNode) {
+        queue = queue.concat(frontNode.inputs);
+      }
+    }
+  }
+  return sorted;
+}
+
 class Node {
   id: string;
   type: string;
@@ -105,6 +123,10 @@ export class Wrapper {
 
   getShape() : Shape {
     return this.node.getShape();
+  }
+
+  getId() : string {
+    return this.node.id;
   }
 
   mm(t2 : Wrapper) : Wrapper {
