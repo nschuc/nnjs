@@ -1,5 +1,6 @@
 // @flow
 import opDescriptions from './ops';
+import ndarray from 'ndarray';
 
 export type Shape = Array<number>
 
