@@ -4,6 +4,9 @@ import ndarray from 'ndarray';
 
 export type Shape = Array<number>
 
+type TargetDict = { [id:string]: Wrapper };
+type FeedDict = { [id:string]: ndarray };
+
 export default class Graph {
   nodes : Map<string, Node>;
   typeCounts : Map<string, number>;
@@ -18,14 +21,14 @@ export default class Graph {
     const shape = opDesc.inferShape(deps.map(t => t.getShape()));
     
     const id = this.createId(type);
-    const result = new Node(id, type, shape);
+    const node = new Node(id, type, shape);
     deps.forEach( d => {
-      d.addOutput(result.id);
-      result.addInput(d.id);
+      d.addOutput(node.id);
+      node.addInput(d.id);
     });
 
-    this.addToGraph(result);
-    return result;
+    this.nodes.set(node.id, node);
+    return node;
   }
 
   createId(type : string) : string {
@@ -43,25 +46,22 @@ export default class Graph {
    * then the corresponding node is wrapped and returned.
    */
   variable(shape : Shape, name? : string) {
-    if( name ) {
+    if(name) {
       const node = this.nodes.get(name);
       if(node) return new Wrapper(node, this);
     }
-    const id = name || this.createId('variable');
-    const node = new Node(id, 'variable', shape);
-    this.addToGraph(node);
-    return new Wrapper(node, this);
+    return this.createAndWrapNode('variable', shape, name);
   }
 
   input(shape : Shape, name? : string) {
-    const id = name || this.createId('input');
-    const node = new Node(id, 'input', shape);
-    this.addToGraph(node);
-    return new Wrapper(node, this);
+    return this.createAndWrapNode('input', shape, name);
   }
 
-  addToGraph(node : Node) {
+  createAndWrapNode(type : string, shape : Shape, name? : string) {
+    const id = name || this.createId(type);
+    const node = new Node(id, type, shape);
     this.nodes.set(node.id, node);
+    return new Wrapper(node, this);
   }
 
 }
@@ -92,7 +92,6 @@ class Node {
   addOutput(id : string) {
     this.outputs.push(id);
   }
-
 }
 
 export class Wrapper {
