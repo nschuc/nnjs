@@ -1,40 +1,62 @@
 // @flow
-import opDescriptions from './ops';
 import ndarray from 'ndarray';
+import { Op, Input, MatMul, Plus, Variable } from './ops';
+import Tensor from './tensor';
+import type { Shape } from './tensor';
 
-export type Shape = Array<number>
-
-type TargetDict = { [id:string]: Wrapper };
-type FeedDict = { [id:string]: ndarray };
 
 export default class Graph {
-  nodes : Map<string, Node>;
-  typeCounts : Map<string, number>;
+  static defaultGraph;
+  nodes : { [id : string]: Op};
+  typeCounts : { [id : string]: number};
 
   constructor(){
-    this.typeCounts = new Map();
-    this.nodes = new Map();
+    this.typeCounts = {};
+    this.nodes = {};
+    Graph.defaultGraph = Graph.defaultGraph || this;
   }
- 
-  addOp(type : string, deps : Array<Node>) : Node {
-    const opDesc = opDescriptions[type];
-    const shape = opDesc.inferShape(deps.map(t => t.getShape()));
-    
-    const id = this.createId(type);
-    const node = new Node(id, type, shape);
-    deps.forEach( d => {
-      d.addOutput(node.id);
-      node.addInput(d.id);
-    });
 
-    this.nodes.set(node.id, node);
-    return node;
+  async compute( inputData : any, outputs : any ) {
+    // Map inputData to input nodes
+    const inputs = Object.keys(this.nodes)
+                     .map(n => this.nodes[n])
+                     .filter(op => !op.inputs.length);
+    for(let input of inputs) {
+      input.result = inputData[input.id];
+    }
+    await this.traverse(inputs);
+  }
+
+  async traverse(nodes : Array<Op>) {
+    if(!nodes.length) return; // done
+    if(nodes.length > 1) {
+      await Promise.all(nodes.map(n => this.traverse([ n ])))
+      return 
+    }
+    else {
+      const node = nodes[0];
+
+      if(node.type === 'Input') return;
+      if(node.visited) return;
+      const dependencies = node.inputs.map(t => t.input.result).filter(a => a);
+      if(dependencies.length !== node.inputs.length) return;
+
+      const res = node.compute(dependencies);
+      node.visited = true;
+
+      let outOps : Array<Op> = [];
+      node.outputs.forEach(t => {
+        outOps = [...outOps, ...t.outputs ];
+      });
+
+      await this.traverse(outOps);
+    }
   }
 
   createId(type : string) : string {
-    const count = this.typeCounts.get(type) || 0;
-    this.typeCounts.set(type, count+1);
-    return `${type}_${count}`;
+    const counts = this.typeCounts;
+    counts[type] = (counts[type] || 0) + 1;
+    return `${type}_${counts[type]}`;
   }
 
   /*
@@ -46,96 +68,36 @@ export default class Graph {
    * then the corresponding node is wrapped and returned.
    */
   variable(shape : Shape, name? : string) {
-    if(name) {
-      const node = this.nodes.get(name);
-      if(node) return new Wrapper(node, this);
-    }
-    return this.createAndWrapNode('variable', shape, name);
+    return this.use('var')({ shape }, name);
   }
 
   input(shape : Shape, name? : string) {
-    return this.createAndWrapNode('input', shape, name);
+    return this.use('input')({ shape }, name);
   }
 
-  createAndWrapNode(type : string, shape : Shape, name? : string) {
-    const id = name || this.createId(type);
-    const node = new Node(id, type, shape);
-    this.nodes.set(node.id, node);
-    return new Wrapper(node, this);
-  }
-
-}
-
-const topologicalSort = (startNodes : Array<string>, graph: Map<string, Node>) => {
-  let sorted = [];
-  let visited = new Set();
-  let queue = startNodes;
-  while(queue.length) {
-    const front = queue.shift();
-    if(!visited.has(front)) { 
-      visited.add(front)
-      sorted.push(front);
-      const frontNode = graph.get(front);
-      if(frontNode) {
-        queue = queue.concat(frontNode.inputs);
+  use( opName: string ) {
+    return (attr : any, name? : string) => {
+      const id = name || this.createId(opName);
+      let op;
+      switch(opName) {
+        case 'mm':
+          op = new MatMul(id, attr);
+          break;
+        case 'plus':
+          op = new Plus(id, attr);
+          break;
+        case 'var':
+          op = new Variable(id, attr);
+          break;
+        case 'input':
+          op = new Input(id, attr);
+          break;
       }
+      if(!op) throw `${opName} is not a valid operation`;
+      // Test that op shape is valid
+      op.getShape();
+      this.nodes[op.id] = op;
+      return new Tensor(op, this);
     }
-  }
-  return sorted;
-}
-
-class Node {
-  id: string;
-  type: string;
-  inputs: Array<string>;
-  outputs: Array<string>;
-  shape: Shape;
-
-  constructor(id : string, type : string, shape : Shape) {
-    this.id = id;
-    this.type = type;
-    this.shape = shape;
-    this.inputs = [];
-    this.outputs = [];
-  }
-  
-  getShape() : Shape {
-    return this.shape;
-  }
-
-  addInput(id : string) {
-    this.inputs.push(id);
-  }
-
-  addOutput(id : string) {
-    this.outputs.push(id);
-  }
-}
-
-export class Wrapper {
-  node: Node;
-  graph: Graph;
-
-  constructor(node: Node, graph : Graph) {
-    this.node = node;
-    this.graph = graph;
-  }
-
-  getShape() : Shape {
-    return this.node.getShape();
-  }
-
-  getId() : string {
-    return this.node.id;
-  }
-
-  mm(t2 : Wrapper) : Wrapper {
-    const newNode = this.graph.addOp('mm', [this.node, t2.node]);
-    return new Wrapper(newNode, this.graph);
-  }
-
-  plus(t2 : Wrapper) : Wrapper {
-    const newNode = this.graph.addOp('plus', [this.node, t2.node]);
-    return new Wrapper(newNode, this.graph);
   }
 }
