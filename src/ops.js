@@ -4,6 +4,7 @@ import Tensor from './tensor';
 import type { Shape } from './tensor';
 
 import ndarray from 'ndarray';
+import cpuops from 'ndarray-ops';
 import gemm from 'ndarray-gemm';
 
 export type OpDesc = {
@@ -86,6 +87,13 @@ export class Plus extends Op {
         throw `incompatible dimension ${i}: expect ${shapes[0][i]} to equal ${shapes[1][i]}`;
     }
     return shapes[0];
+  }
+
+  compute(inputs : Array<ndarray>){
+    let y = ndarray([], this.getShape(inputs.map(t => t.shape)));
+    cpuops.add(y, inputs[0], inputs[1]);
+    this.result = y;
+    return this.result;
   }
 
   gradient () {
