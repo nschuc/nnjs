@@ -1,5 +1,13 @@
 import * as esprima from 'esprima';
 
+export const closeEnough = (a, b, eps=1e-3) => {
+  for(let i = 0; i < a.data.length; i++) {
+    if(Math.abs(a.data[i] - b.data[i]) > eps) return false;
+  }
+  return true;
+}
+
+
 export const getId = (layers, type) => {
   let idx = 1;
   let lcType = type.toLocaleLowerCase();

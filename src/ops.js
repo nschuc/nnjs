@@ -1,26 +1,22 @@
 // @flow
 import Graph from './graph';
-import Tensor from './tensor';
 import type { Shape } from './tensor';
 
 import ndarray from 'ndarray';
+import cwise from 'cwise';
+import zerose from 'cwise';
 import cpuops from 'ndarray-ops';
 import gemm from 'ndarray-gemm';
-
-export type OpDesc = {
-  name: string,
-  inferShape: (inputs : Array<Shape>) => Shape,
-  gradient: Function
-};
 
 export class Op {
   id: string;
   type: string;
-  inputs: Array<Tensor>;
-  outputs: Array<Tensor>;
+  inputs: Array<Op>;
+  outputs: Array<Op>;
   shape: Shape;
   visited : boolean;
   result : ndarray;
+  depCount : number;
 
   constructor(type : string, id : string, attrs : any = {}) {
     this.type = type;
@@ -28,25 +24,31 @@ export class Op {
     this.id = id;
 
     const {
+      shape,
       inputs = []
     } = attrs;
 
-    for(let t of inputs) {
-      t.outputs.push(this);
+    this.inputs = inputs.map(t => t.input);
+    if(shape) {
+      this.shape = shape;
     }
-    this.inputs = inputs;
+    else {
+      const inShapes = this.inputs.map(t => t.shape);
+      if(inShapes.length)
+        this.shape = this.inferShape(inShapes);
+    }
+
+    for(let t of inputs) {
+      t.input.outputs.push(this);
+      this.depCount++;
+    }
   }
-  
-  getShape() : Shape {
+
+  inferShape(shapes : Array<Shape>) : Shape {
     return this.shape;
   }
 
-  addInput(t : Tensor) {
-    this.inputs.push(t);
-  }
-
   compute(inputs : Array<ndarray>) {
-    console.log(`Computing ${this.id}`);
     return inputs[0];
   }
 }
@@ -56,16 +58,16 @@ export class MatMul extends Op {
     super('MatMul', id, attrs);
   }
 
-  getShape (inputs? : Array<Shape>) {
-    const shapes = inputs || this.inputs.map(t => t.getShape());
-    if (shapes[0][1] !== shapes[1][0] ) {
+  inferShape (shapes : Array<Shape>) :Shape {
+    if ( shapes[0][1] !== shapes[1][0] ) {
       throw `incompatible tensor shapes for matmul ${shapes[0][1]} and ${shapes[1][0]}`;
     }
-    return [shapes[0][0], shapes[1][shapes[1].length - 1]]
+    return [shapes[0][0], shapes[1][1]];
   }
-    
+
   compute(inputs : Array<ndarray>){
-    let y = ndarray([], this.getShape(inputs.map(t => t.shape)));
+    const shape = this.inferShape(inputs.map(a => a.shape));
+    let y = ndarray([], shape);
     gemm(y, inputs[0], inputs[1]);
     this.result = y;
     return this.result;
@@ -80,8 +82,7 @@ export class Plus extends Op {
     super('Plus', id, attrs);
   }
 
-  getShape (inputs? : Array<Shape>) {
-    const shapes = inputs || this.inputs.map(t => t.getShape());
+  inferShape (shapes : Array<Shape>) {
     for(let i = 0; i < shapes.length; i++) {
       if(shapes[0][i] !== shapes[1][i])
         throw `incompatible dimension ${i}: expect ${shapes[0][i]} to equal ${shapes[1][i]}`;
@@ -90,7 +91,8 @@ export class Plus extends Op {
   }
 
   compute(inputs : Array<ndarray>){
-    let y = ndarray([], this.getShape(inputs.map(t => t.shape)));
+    const shape = this.inferShape(inputs.map(a => a.shape));
+    let y = ndarray([], shape);
     cpuops.add(y, inputs[0], inputs[1]);
     this.result = y;
     return this.result;
@@ -102,20 +104,26 @@ export class Plus extends Op {
 
 export class Variable extends Op {
   constructor(id: string, attrs : any = {}) {
-    super('Variable', id);
+    super('Variable', id, attrs);
     const {
       shape = []
     } = attrs;
     this.shape = shape;
   }
+
+  compute() {
+    return this.result;
+  }
 }
 
 export class Input extends Op {
   constructor(id : string, attrs : any = {}) {
-    super('Input', id);
+    super('Input', id, attrs);
     const {
       shape = []
     } = attrs;
-    this.shape = shape;
+  }
+  compute() {
+    return this.result;
   }
 }
