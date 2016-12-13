@@ -18,7 +18,6 @@ const plusData = {
 
 const closeEnough = (a, b, eps=1e-3) => {
   for(let i = 0; i < a.data.length; i++) {
-    console.log(a.data[i], b.data[i]);
     if(Math.abs(a.data[i] - b.data[i]) > eps) return false;
   }
   return true;
