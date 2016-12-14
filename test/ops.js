@@ -1,11 +1,13 @@
 import test from 'ava';
 import Graph from '../src/graph';
 import Tensor from '../src/tensor';
+import { closeEnough } from '../src/utils';
 import ndarray from 'ndarray';
 
 import {
   MatMul,
   Plus,
+  Sub,
   ReduceSum
 } from '../src/ops';
 
@@ -20,18 +22,13 @@ const mmData = {
   y: ndarray(new Float32Array([-1, -3, -4, 1, 2.3, 1, 16.7, 46.81, 52.7]), [3,3])
 }
 
-const plusData = {
-  W: ndarray(new Float32Array([0, -1, 1, 0, 4.7, 12]), [3,2]),
-  x: ndarray(new Float32Array([1, 2.3, 1, 1, 3, 4]), [3,2]),
-  y: ndarray(new Float32Array([1, 1.3, 2, 1, 7.7, 16]), [3,2])
+const matTestData = {
+  a: ndarray(new Float32Array([0, -1, 1, 0, 4.7, 12]), [3,2]),
+  b: ndarray(new Float32Array([1, 2.3, 1, 1, 3, 4]), [3,2]),
+  a_plus_b: ndarray(new Float32Array([1, 1.3, 2, 1, 7.7, 16]), [3,2]),
+  a_sub_b: ndarray(new Float32Array([-1, -3.3, 0, -1, 1.7, 8]), [3,2])
 }
 
-const closeEnough = (a, b, eps=1e-3) => {
-  for(let i = 0; i < a.data.length; i++) {
-    if(Math.abs(a.data[i] - b.data[i]) > eps) return false;
-  }
-  return true;
-}
 
 test('tensor shape gets set', t => {
   const G = new Graph()
@@ -62,9 +59,16 @@ test('matrix multiplication computation', t => {
 
 test('matrix addition computation', t => {
   const op = new Plus();
-  const y = op.compute([plusData.W, plusData.x]);
-  t.true(closeEnough(y, plusData.y), 'result is not close enough');
-  t.deepEqual(y.shape, plusData.y.shape, 'shape is wrong');
+  const y = op.compute([matTestData.a, matTestData.b]);
+  t.true(closeEnough(y, matTestData.a_plus_b), 'result is not close enough');
+  t.deepEqual(y.shape, matTestData.a_plus_b.shape, 'shape is wrong');
+})
+
+test('matrix subtraction computation', t => {
+  const op = new Sub();
+  const y = op.compute([matTestData.a, matTestData.b]);
+  t.true(closeEnough(y, matTestData.a_sub_b), 'result is not close enough');
+  t.deepEqual(y.shape, matTestData.a_sub_b.shape, 'shape is wrong');
 })
 
 test('reduce sum computation', t => {

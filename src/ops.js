@@ -102,6 +102,31 @@ export class Plus extends Op {
   }
 }
 
+export class Sub extends Op {
+  constructor(id : string, attrs : any = {}){
+    super('Sub', id, attrs);
+  }
+
+  inferShape (shapes : Array<Shape>) {
+    for(let i = 0; i < shapes.length; i++) {
+      if(shapes[0][i] !== shapes[1][i])
+        throw `incompatible dimension ${i}: expect ${shapes[0][i]} to equal ${shapes[1][i]}`;
+    }
+    return shapes[0];
+  }
+
+  compute(inputs : Array<ndarray>){
+    const shape = this.inferShape(inputs.map(a => a.shape));
+    let y = ndarray([], shape);
+    cpuops.sub(y, inputs[0], inputs[1]);
+    this.result = y;
+    return this.result;
+  }
+
+  gradient () {
+  }
+}
+
 export class ReduceSum extends Op {
   dim : number;
 

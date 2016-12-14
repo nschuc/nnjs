@@ -62,17 +62,20 @@ test('train a linear regression', t => {
   const W = G.input([10, 10], 'W');
   const b = G.input([10, 1], 'b');
   const x = G.input([10, 1], 'x');
+  const label = G.input([10, 1], 'x');
 
-  const y = W.mm(x).plus(b);
-// Mean squared error
-// cost = tf.reduce_sum(tf.pow(pred-Y, 2))/(2*n_samples)
-// optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
-    const result = G.compute({
+  const y_pred = W.mm(x).plus(b);
+  //const loss = y_pred.sub(label).pow(2).reduce_sum(dim: 1);
+//Mean squared error
+//cost = tf.reduce_sum(tf.pow(pred-Y, 2))/(2*n_samples)
+//optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
+  const result = G.compute({
     [ x.getId() ] : testData.x,
     [ W.getId() ] : testData.W,
     [ b.getId() ] : testData.b,
+    [ b.getId() ] : testData.b,
   }, {
-    y
+    loss
   });
 
   t.true(closeEnough(result.y, testData.y), 'result is not close enough');
