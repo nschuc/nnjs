@@ -102,6 +102,39 @@ export class Plus extends Op {
   }
 }
 
+export class ReduceSum extends Op {
+  dim : number;
+
+  constructor(id : string, attrs : any = {}){
+    super('ReduceSum', id, attrs);
+    const {
+      dim = 0
+    } = attrs;
+
+    this.dim = dim;
+  }
+
+  inferShape ([shape : Shape]) {
+    return [
+      ...shape.slice(0, this.dim),
+      ...shape.slice(this.dim+1),
+    ]
+  }
+
+  compute([input : ndarray]){
+    const shape = this.inferShape([input.shape]);
+    let y = ndarray(new Float32Array(shape.reduce((a, b) => a * b, 1)), shape);
+    for(let i = 0; i < input.shape[this.dim]; i++) {
+      const indices = input.shape.map((_, k) => k == this.dim ? i : -1);
+      cpuops.addeq(y, input.pick(...indices));
+    }
+    return y;
+  }
+
+  gradient () {
+  }
+}
+
 export class Variable extends Op {
   constructor(id: string, attrs : any = {}) {
     super('Variable', id, attrs);

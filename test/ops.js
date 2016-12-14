@@ -1,8 +1,18 @@
 import test from 'ava';
 import Graph from '../src/graph';
-import { MatMul, Plus } from '../src/ops';
 import Tensor from '../src/tensor';
 import ndarray from 'ndarray';
+
+import {
+  MatMul,
+  Plus,
+  ReduceSum
+} from '../src/ops';
+
+const reduceData = {
+  W: ndarray(new Float32Array([1, -2, 1, 3, 5, 12]), [3,2]),
+  y: ndarray(new Float32Array([-1, 4, 17]), [3])
+}
 
 const mmData = {
   W: ndarray(new Float32Array([0, -1, 1, 0, 4.7, 12]), [3,2]),
@@ -43,18 +53,26 @@ test('tensor shapes are computed properly', t => {
   t.deepEqual(result.getShape(), [50, 1], 'result of matrix addition is not right');
 })
 
-test.only('matrix multiplication computation works', t => {
+test('matrix multiplication computation', t => {
   const op = new MatMul();
   const y = op.compute([mmData.W, mmData.x]);
   t.true(closeEnough(y, mmData.y), 'result is not close enough');
   t.deepEqual(y.shape, mmData.y.shape, 'shape is wrong');
 })
 
-test.only('matrix addition computation works', t => {
+test('matrix addition computation', t => {
   const op = new Plus();
   const y = op.compute([plusData.W, plusData.x]);
   t.true(closeEnough(y, plusData.y), 'result is not close enough');
   t.deepEqual(y.shape, plusData.y.shape, 'shape is wrong');
+})
+
+test('reduce sum computation', t => {
+  const op = new ReduceSum('', {dim: 1});
+  t.deepEqual(op.inferShape([reduceData.W.shape]), reduceData.y.shape, 'shape is wrong');
+  const y = op.compute([reduceData.W]);
+  t.true(closeEnough(y, reduceData.y), 'result is not close enough');
+  t.deepEqual(y.shape, reduceData.y.shape, 'shape is wrong');
 })
 
 test('incompatible shapes throws an error', t => {
