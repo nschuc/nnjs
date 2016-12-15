@@ -65,7 +65,7 @@ test.only('train a linear regression', t => {
   const y = G.input([10, 1], 'y');
 
   const y_pred = W.mm(x).plus(b);
-  const loss = y_pred.sub(y).pow(2).reduce_sum(dim: 1);
+  const loss = y_pred.sub(y).pow(2).reduce_sum({dim: 1});
 //Mean squared error
 //cost = tf.reduce_sum(tf.pow(pred-Y, 2))/(2*n_samples)
 //optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
