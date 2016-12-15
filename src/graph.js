@@ -60,7 +60,12 @@ export default class Graph {
                      .map(n => this.nodes[n])
                      .filter(op => !op.inputs.length);
 
+    if(Object.keys(inputData).length < inputs.length) {
+      throw 'Not enough inputs provided to perform computation';
+    }
+
     for(let input of inputs) {
+      if(!inputData[input.id]) throw `Input data not found for '${input.id}'`;
       input.result = inputData[input.id];
     }
 
