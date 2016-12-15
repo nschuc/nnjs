@@ -115,7 +115,6 @@ export default class Graph {
           op = new Sub(id, attrs);
           break;
         case 'pow':
-          console.log(attrs);
           op = new Pow(id, attrs);
           break;
         case 'reduce_sum':
