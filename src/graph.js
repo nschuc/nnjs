@@ -1,6 +1,8 @@
 // @flow
 import ndarray from 'ndarray';
-import { Op, Input, MatMul, Plus, Variable } from './ops';
+import { 
+  Op, Input, Variable, MatMul, Plus, Sub, Pow, ReduceSum
+} from './ops';
 import Tensor from './tensor';
 import type { Shape } from './tensor';
 
@@ -24,7 +26,6 @@ export default class Graph {
       const dependencies = node.inputs
         .map(op => op.result)
         .filter(a => a);
-
       const res = node.compute(dependencies);
       node.outputs.forEach(node => node.depCount--);
       node.visited = true;
@@ -100,21 +101,31 @@ export default class Graph {
   }
 
   use( opName: string ) {
-    return (attr : any, name? : string) => {
+    return (attrs : any, name? : string) => {
       const id = name || this.createId(opName);
       let op;
       switch(opName) {
         case 'mm':
-          op = new MatMul(id, attr);
+          op = new MatMul(id, attrs);
           break;
         case 'plus':
-          op = new Plus(id, attr);
+          op = new Plus(id, attrs);
+          break;
+        case 'sub':
+          op = new Sub(id, attrs);
+          break;
+        case 'pow':
+          console.log(attrs);
+          op = new Pow(id, attrs);
+          break;
+        case 'reduce_sum':
+          op = new ReduceSum(id, attrs);
           break;
         case 'var':
-          op = new Variable(id, attr);
+          op = new Variable(id, attrs);
           break;
         case 'input':
-          op = new Input(id, attr);
+          op = new Input(id, attrs);
           break;
       }
       if(!op) throw `${opName} is not a valid operation`;

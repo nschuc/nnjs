@@ -57,15 +57,15 @@ test('graph computation works for y = Wx + b', t => {
   t.is(Object.keys(G.nodes).length, 5, 'not enough ops in graph');
 });
 
-test('train a linear regression', t => {
+test.only('train a linear regression', t => {
   const G = new Graph()
   const W = G.input([10, 10], 'W');
   const b = G.input([10, 1], 'b');
   const x = G.input([10, 1], 'x');
-  const label = G.input([10, 1], 'x');
+  const y = G.input([10, 1], 'y');
 
   const y_pred = W.mm(x).plus(b);
-  //const loss = y_pred.sub(label).pow(2).reduce_sum(dim: 1);
+  const loss = y_pred.sub(y).pow(2).reduce_sum(dim: 1);
 //Mean squared error
 //cost = tf.reduce_sum(tf.pow(pred-Y, 2))/(2*n_samples)
 //optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
@@ -73,11 +73,8 @@ test('train a linear regression', t => {
     [ x.getId() ] : testData.x,
     [ W.getId() ] : testData.W,
     [ b.getId() ] : testData.b,
-    [ b.getId() ] : testData.b,
+    [ y.getId() ] : testData.y,
   }, {
-    loss
+    y_pred
   });
-
-  t.true(closeEnough(result.y, testData.y), 'result is not close enough');
-  t.is(Object.keys(G.nodes).length, 5, 'not enough ops in graph');
 });

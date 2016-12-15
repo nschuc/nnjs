@@ -21,6 +21,7 @@ export class Op {
   constructor(type : string, id : string, attrs : any = {}) {
     this.type = type;
     this.outputs = [];
+    this.depCount = 0;
     this.id = id;
 
     const {
@@ -127,6 +128,32 @@ export class Sub extends Op {
   }
 }
 
+export class Pow extends Op {
+  exp: number;
+  constructor(id : string, attrs : any = {}){
+    super('Pow', id, attrs);
+    const {
+      exp = 1
+    } = attrs;
+    this.exp = exp;
+  }
+
+  inferShape ([shape] : Array<Shape>) {
+    return shape;
+  }
+
+  compute([input] : Array<ndarray>){
+    const shape = this.inferShape([input.shape]);
+    let y = ndarray([], shape);
+    cpuops.pows(y, input, this.exp);
+    this.result = y;
+    return this.result;
+  }
+
+  gradient () {
+  }
+}
+
 export class ReduceSum extends Op {
   dim : number;
 
@@ -139,14 +166,14 @@ export class ReduceSum extends Op {
     this.dim = dim;
   }
 
-  inferShape ([shape : Shape]) {
+  inferShape ([shape] : Array<Shape>) {
     return [
       ...shape.slice(0, this.dim),
       ...shape.slice(this.dim+1),
     ]
   }
 
-  compute([input : ndarray]){
+  compute([input] : Array<ndarray>){
     const shape = this.inferShape([input.shape]);
     let y = ndarray(new Float32Array(shape.reduce((a, b) => a * b, 1)), shape);
     for(let i = 0; i < input.shape[this.dim]; i++) {

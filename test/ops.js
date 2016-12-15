@@ -8,7 +8,8 @@ import {
   MatMul,
   Plus,
   Sub,
-  ReduceSum
+  ReduceSum,
+  Pow
 } from '../src/ops';
 
 const reduceData = {
@@ -26,7 +27,8 @@ const matTestData = {
   a: ndarray(new Float32Array([0, -1, 1, 0, 4.7, 12]), [3,2]),
   b: ndarray(new Float32Array([1, 2.3, 1, 1, 3, 4]), [3,2]),
   a_plus_b: ndarray(new Float32Array([1, 1.3, 2, 1, 7.7, 16]), [3,2]),
-  a_sub_b: ndarray(new Float32Array([-1, -3.3, 0, -1, 1.7, 8]), [3,2])
+  a_sub_b: ndarray(new Float32Array([-1, -3.3, 0, -1, 1.7, 8]), [3,2]),
+  a_pow_2: ndarray(new Float32Array([0, 1, 1, 0, 22.09, 144]), [3,2])
 }
 
 
@@ -45,7 +47,7 @@ test('tensor shapes are computed properly', t => {
 
   let result = W.mm(x);
   t.deepEqual(result.getShape(), [50, 1], 'result of matrix mult is not right');
-  
+
   result = result.plus(b);
   t.deepEqual(result.getShape(), [50, 1], 'result of matrix addition is not right');
 })
@@ -77,6 +79,13 @@ test('reduce sum computation', t => {
   const y = op.compute([reduceData.W]);
   t.true(closeEnough(y, reduceData.y), 'result is not close enough');
   t.deepEqual(y.shape, reduceData.y.shape, 'shape is wrong');
+})
+
+test('pow computation', t => {
+  const op = new Pow('', {exp: 2});
+  const y = op.compute([matTestData.a]);
+  t.true(closeEnough(y, matTestData.a_pow_2), 'result is not close enough');
+  t.deepEqual(y.shape, matTestData.a_pow_2.shape, 'shape is wrong');
 })
 
 test('incompatible shapes throws an error', t => {
