@@ -78,6 +78,31 @@ export class MatMul extends Op {
   }
 }
 
+export class Div extends Op {
+  constructor(id : string, attrs : any = {}){
+    super('Div', id, attrs);
+  }
+
+  inferShape (shapes : Array<Shape>) {
+    for(let i = 0; i < shapes.length; i++) {
+      if(shapes[0][i] !== shapes[1][i])
+        throw `incompatible dimension ${i}: expect ${shapes[0][i]} to equal ${shapes[1][i]}`;
+    }
+    return shapes[0];
+  }
+
+  compute(inputs : Array<ndarray>){
+    const shape = this.inferShape(inputs.map(a => a.shape));
+    let y = ndarray([], shape);
+    cpuops.div(y, inputs[0], inputs[1]);
+    this.result = y;
+    return this.result;
+  }
+
+  gradient () {
+  }
+}
+
 export class Plus extends Op {
   constructor(id : string, attrs : any = {}){
     super('Plus', id, attrs);
@@ -184,6 +209,25 @@ export class ReduceSum extends Op {
   }
 
   gradient () {
+  }
+}
+
+export class Constant extends Op {
+  constructor(id: string, attrs : any = {}) {
+    super('Variable', id, attrs);
+    const {
+      shape = [],
+      val = 0
+    } = attrs;
+    this.shape = shape;
+    this.val = val;
+  }
+
+  compute() {
+    let y = ndarray([], this.shape);
+    cpuops.assigns(y, this.val);
+    this.result = y;
+    return y;
   }
 }
 

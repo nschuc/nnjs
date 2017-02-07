@@ -1,7 +1,7 @@
 // @flow
 import ndarray from 'ndarray';
 import { 
-  Op, Input, Variable, MatMul, Plus, Sub, Pow, ReduceSum
+  Op, Input, Variable, MatMul, Plus, Sub, Pow, ReduceSum, Div
 } from './ops';
 import Tensor from './tensor';
 import type { Shape } from './tensor';
@@ -18,8 +18,9 @@ export default class Graph {
     Graph.defaultGraph = Graph.defaultGraph || this;
   }
 
-   compute( inputData : any, outputs : any ) {
+  compute( inputData : any, outputs : any ) {
     const inputs = this.feedInputs(inputData);
+
     this.traverse(inputs, node => {
       if(node.visited) return [];
       if(node.depCount > 0) return []; // dependencies aren't finished
@@ -36,6 +37,37 @@ export default class Graph {
     return results;
   }
 
+  train( inputData : any, outputs : any ) {
+    const inputs = this.feedInputs(inputData);
+
+    // Forward
+    this.traverse(inputs, node => {
+      if(node.visited) return [];
+      if(node.depCount > 0) return []; // dependencies aren't finished
+      const dependencies = node.inputs
+        .map(op => op.result)
+        .filter(a => a);
+      const res = node.compute(dependencies);
+      node.outputs.forEach(node => node.depCount--);
+      node.visited = true;
+      return node.outputs;
+    });
+
+    // Backward
+    this.traverse(inputs, node => {
+      if(!node.visited) return [];
+      if(node.depCount < 0) return []; // dependencies aren't finished
+      const grads = node.outputs
+        .map(op => op.grad);
+      const res = node.gradient(grads);
+      node.outputs.forEach(node => node.depCount++);
+      node.visited = true;
+      return node.outputs;
+    });
+
+    const results = this.getResults(outputs);
+    return results;
+  }
 
   async traverse(nodes : Array<Op>, visitor : (node : Op) => Array<Op>) {
     if(!nodes.length) return; // done
@@ -119,6 +151,9 @@ export default class Graph {
           break;
         case 'reduce_sum':
           op = new ReduceSum(id, attrs);
+          break;
+        case 'div':
+          op = new Div(id, attrs);
           break;
         case 'var':
           op = new Variable(id, attrs);
