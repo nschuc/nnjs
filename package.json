@@ -1,64 +1,25 @@
 {
   "name": "nnjs",
-  "version": "0.1.0",
-  "description": "A neural network library in JS",
+  "version": "0.0.1",
+  "description": "library for tensors",
   "main": "index.js",
+  "repository": "https://github.com/nschuc/nnjs.git",
+  "author": "Nathan Schucher <nathan.schucher@gmail.com>",
   "scripts": {
-    "test": "ava",
-    "flow": "flow; test $? -eq 0 -o $? -eq 2"
+    "test": "jest"
   },
-  "author": "",
-  "license": "ISC",
+  "jest": {},
+  "license": "MIT",
   "devDependencies": {
-    "ava": "^0.16.0",
-    "babel-core": "^6.18.2",
-    "babel-loader": "^6.2.7",
-    "babel-plugin-transform-async-to-module-method": "^6.16.0",
-    "babel-plugin-transform-class-properties": "^6.19.0",
-    "babel-plugin-transform-flow-strip-types": "^6.18.0",
-    "babel-plugin-transform-object-rest-spread": "^6.19.0",
-    "babel-plugin-transform-runtime": "^6.15.0",
-    "babel-preset-es2015": "^6.18.0",
-    "babel-preset-latest": "^6.16.0",
-    "babel-preset-stage-0": "^6.16.0",
-    "flow-bin": "^0.35.0",
-    "json-loader": "^0.5.4",
-    "source-map-loader": "^0.1.5",
-    "ts-loader": "^1.2.2",
-    "typescript": "^2.0.10",
-    "webpack": "^1.13.3"
-  },
-  "ava": {
-    "require": [
-      "babel-register"
-    ]
-  },
-  "babel": {
-    "presets": [
-      "latest"
-    ],
-    "plugins": [
-      "transform-flow-strip-types",
-      "transform-object-rest-spread",
-      [
-        "transform-runtime",
-        {
-          "polyfill": false,
-          "regenerator": true
-        }
-      ]
-    ]
+    "babel-cli": "^6.22.2",
+    "babel-jest": "^18.0.0",
+    "babel-plugin-transform-flow-strip-types": "^6.22.0",
+    "babel-polyfill": "^6.22.0",
+    "babel-preset-latest": "^6.22.0",
+    "jest": "^18.1.0"
   },
   "dependencies": {
-    "babel-runtime": "^6.18.0",
-    "cwise": "^1.0.9",
-    "escodegen": "^1.8.1",
-    "esprima": "^3.1.1",
-    "ndarray": "^1.0.18",
-    "ndarray-blas-level2": "^1.1.0",
-    "ndarray-gemm": "^1.0.0",
-    "ndarray-ops": "^1.2.2",
-    "weblas": "^0.9.0",
-    "zeroes": "^0.1.0"
+    "flow": "^0.2.3",
+    "numjs": "^0.12.4"
   }
 }

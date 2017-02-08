@@ -1,44 +1,49 @@
 //@flow
-import Graph from './graph';
-import { Op } from './ops';
-import ndarray from 'ndarray';
+import nj, { NdArray } from 'numjs';
 
-export type Shape = Array<number>
+class Storage {
+  data: nj.array;
+
+  constructor({ data, shape } : { data? : nj.array, shape? : Array<number> }) {
+    this.data = data || nj.zeros(shape, 'float32');
+  }
+
+  add(t : Storage) {
+    return this.data.add(t.data);
+  }
+
+  mm(t : Storage) {
+    return this.data.dot(t.data);
+  }
+}
 
 export default class Tensor {
-  input: Op;
-  _graph: Graph;
+  shape: Array<number>;
+  storage: Storage;
 
-  constructor(op: Op, _graph : Graph) {
-    this.input = op;
-    this._graph = _graph;
+  constructor({ data, shape = [] } : { data? : nj.array, shape? : Array<number> }) {
+    if(data) {
+      shape = data.shape;
+    }
+    this.shape = shape;
+    this.storage = new Storage({ data, shape });
   }
 
-  getShape() : Shape {
-    return this.input.shape;
+  shape() {
+    return this.shape;
   }
 
-  getId() : string {
-    return this.input.id;
+  numjs() {
+    return this.storage.data;
   }
 
-  mm(t2 : Tensor) : Tensor {
-    return this._graph.use('mm')({ inputs: [this, t2] });
+  add(t : Tensor) {
+    const data = this.storage.add(t.storage);
+    return new Tensor({ data });
   }
 
-  plus(t2 : Tensor) : Tensor {
-    return this._graph.use('plus')({ inputs: [this, t2] });
-  }
-
-  sub(t2 : Tensor) : Tensor {
-    return this._graph.use('sub')({ inputs: [this, t2] });
-  }
-
-  pow(exp : number) : Tensor {
-    return this._graph.use('pow')({ inputs: [this], exp });
-  }
-
-  reduce_sum(attrs : any) : Tensor {
-    return this._graph.use('reduce_sum')({ inputs: [this], ...attrs });
+  mm(t : Tensor) {
+    const data = this.storage.mm(t.storage);
+    return new Tensor({ data });
   }
 }
