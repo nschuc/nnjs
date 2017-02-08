@@ -15,7 +15,7 @@ export default class Op {
     throw "Forward not implemented!"
   }
 
-  backward(grad : Tensor) {
+  backward(grad : Tensor) : Array<any> {
     throw "Backward not implemented!"
   }
 }
@@ -31,7 +31,7 @@ export class MatMul extends Op {
 
   backward (grad : Tensor) {
     let [ t1, t2 ] = this.backwardCache;
-    return [ grad.mm(t2.T), grad.mm(t1.T) ]
+    return [ grad.mm(t2.T), (t1.T).mm(grad) ]
   }
 }
 
@@ -40,7 +40,7 @@ export class Add extends Op {
     return t1.add(t2);
   }
 
-  backward (grad : Tensor) {
+  backward (grad : Tensor) : Array<Tensor> {
     return [grad, grad]
   }
 }
