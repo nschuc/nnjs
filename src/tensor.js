@@ -8,12 +8,27 @@ class Storage {
     this.data = data || nj.zeros(shape, 'float32');
   }
 
-  add(t : Storage) {
-    return this.data.add(t.data);
+  transpose(dims: Array<number> = [1, 0]) {
+    return this.data.transpose(dims);
   }
 
-  mm(t : Storage) {
-    return this.data.dot(t.data);
+  add(t : Tensor | number) {
+    const data = typeof t == 'number' ? t : t.storage.data;
+    return this.data.add(data);
+  }
+
+  mm(t : Tensor | number) {
+    const data = typeof t == 'number' ? t : t.storage.data;
+    return this.data.dot(data);
+  }
+
+  mul(t : Tensor | number) {
+    const data = typeof t == 'number' ? t : t.storage.data;
+    return this.data.multiply(data);
+  }
+
+  norm() {
+    return nj.sqrt(nj.power(this.data, 2).sum());
   }
 }
 
@@ -37,13 +52,28 @@ export default class Tensor {
     return this.storage.data;
   }
 
-  add(t : Tensor) {
-    const data = this.storage.add(t.storage);
+  get T() : Tensor {
+    const data = this.storage.transpose();
     return new Tensor({ data });
   }
 
-  mm(t : Tensor) {
-    const data = this.storage.mm(t.storage);
+  add(other : Tensor | number) {
+    const data = this.storage.add(other);
+    return new Tensor({ data });
+  }
+
+  mm(other : Tensor) {
+    const data = this.storage.mm(other);
+    return new Tensor({ data });
+  }
+
+  mul(other : number | Tensor) {
+    const data = this.storage.mul(other);
+    return new Tensor({ data });
+  }
+
+  norm() {
+    const data = this.storage.norm();
     return new Tensor({ data });
   }
 }

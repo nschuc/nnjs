@@ -19,6 +19,7 @@
     "jest": "^18.1.0"
   },
   "dependencies": {
+    "allclose": "^1.1.1",
     "flow": "^0.2.3",
     "numjs": "^0.12.4"
   }

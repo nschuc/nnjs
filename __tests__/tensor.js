@@ -11,8 +11,8 @@ describe('tensor addition', () => {
   });
 
   it('should add two tensors', () => {
-    let t1 = new Tensor({ shape: [5, 3] });
-    let t2 = new Tensor({ shape: [5, 3]});
+    let t1 = new Tensor({ data: matTestData.a });
+    let t2 = new Tensor({ data: matTestData.b });
     let t3 = t1.add(t2);
     const res = t3.numjs();
     expect(closeEnough(res, matTestData.a_plus_b)).toBe(true);

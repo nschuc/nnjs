@@ -12,8 +12,11 @@ describe('variable op mixins', () => {
 
 describe('variable addition', () => {
   it('should have an add operation', () => {
-    let v1 = new Variable(new Tensor({ shape: [5, 3] }));
-    let v2 = new Variable(new Tensor({ shape: [5, 3] }));
+    let t1 = new Tensor({ data: matTestData.a });
+    let t2 = new Tensor({ data: matTestData.b });
+
+    let v1 = new Variable(t1);
+    let v2 = new Variable(t2);
     let v3 = v1.add(v2);
     const res = v3.data.numjs();
     expect(closeEnough(res, matTestData.a_plus_b)).toBe(true);

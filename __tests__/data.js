@@ -1,14 +1,10 @@
 import nj from 'numjs';
+import allclose from 'allclose';
 
 export const closeEnough = (a, b, eps=1e-3) => {
   a = a.tolist();
   b = b.tolist();
-  for(let i = 0; i < a.length; i++) {
-    if(Math.abs(a[i] - b[i]) > eps) {
-      return false;
-    }
-  }
-  return true;
+  return allclose(a, b, eps);
 }
 
 export const matTestData = {
