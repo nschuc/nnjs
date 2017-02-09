@@ -18,15 +18,21 @@ export default class Variable {
   static _registerOp(name : string, Op) {
     let proto : Object = Variable.prototype;
     proto[name] = function(other : Tensor | Variable) {
+      let op = null;
+
       if(other instanceof Variable) {
-        const op = new Op();
+        op = new Op();
+      }
+      else if(!other || typeof other == 'number') {
+        op = new ops.Constant(new Op(), other);
+      }
+
+      if(op) {
         const t = op.forward(this.data, other.data);
         return new Variable(t);
       }
-      else if(typeof other == 'number') {
-        const op = new ops.Constant(new Op(), other);
-        const t = op.forward(this.data, other.data);
-        return new Variable(t);
+      else {
+        throw `Error constructing op: ${name}`;
       }
     }
   }
