@@ -57,6 +57,14 @@ export default class Tensor {
     return new Tensor({ data });
   }
 
+  static ones(...shape : Array<number>) {
+    return new Tensor({ data: nj.ones(shape) });
+  }
+
+  static randn(...shape : Array<number>) {
+    return new Tensor({ data: nj.random(shape) });
+  }
+
   add(other : Tensor | number) {
     const data = this.storage.add(other);
     return new Tensor({ data });
