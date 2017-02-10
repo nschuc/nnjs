@@ -28,7 +28,7 @@ class Storage {
   }
 
   norm() {
-    return nj.sqrt(nj.power(this.data, 2).sum());
+    return Math.sqrt(nj.power(this.data, 2).sum());
   }
 }
 
@@ -81,7 +81,6 @@ export default class Tensor {
   }
 
   norm() {
-    const data = this.storage.norm();
-    return new Tensor({ data });
+    return this.storage.norm();
   }
 }

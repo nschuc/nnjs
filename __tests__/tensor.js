@@ -1,6 +1,11 @@
 import Tensor from '../src/tensor.js'
 import nj from 'numjs';
-import { closeEnough, matTestData, mmData } from './data.js';
+import { 
+  closeEnough, 
+  matTestData, 
+  mmData,
+  normData
+} from './data.js';
 
 describe('tensor addition', () => {
   it('should create a third tensor with same shape', () => {
@@ -33,4 +38,12 @@ describe('matrix multiplication', () => {
     let y = W.mm(x);
     expect(closeEnough(y.numjs(), mmData.y)).toBe(true);
   });
+})
+
+describe('norm', () => {
+  it('should compute norm', () => {
+    let x = new Tensor({ data: normData.x });
+    expect(x.norm()).toBeCloseTo(normData.norm);
+  });
+
 })

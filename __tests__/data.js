@@ -21,6 +21,11 @@ export const mmData = {
   y: nj.array([[-1, -3, -4], [1, 2.3, 1], [16.7, 46.81, 52.7]])
 }
 
+export const normData = {
+  x: nj.array([[0, -1], [1, 0], [4.7, 12]]),
+  norm: 12.96
+}
+
 describe('test data', () => {
   it('should exist', () => {
   });
