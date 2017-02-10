@@ -1,10 +1,14 @@
 // @flow
 import Tensor from '../tensor.js';
+import Variable from './variable.js';
 
 export default class Op {
   backwardCache: Array<Tensor>;
+  inputs: Array<Variable>;
+
   constructor() {
     this.backwardCache = [];
+    this.inputs = [];
   }
 
   cacheForBackward(...tensors : Array<any>) {
@@ -17,6 +21,17 @@ export default class Op {
 
   backward(grad : Tensor) : Array<any> {
     throw "Backward not implemented!"
+  }
+
+  setInputs(...inputs : Array<Variable>) {
+    this.inputs = inputs;
+  }
+
+  run_backward(grad : Tensor) {
+    const grads = this.backward(grad);
+    for(let i = 0; i < this.inputs.length; i++) {
+      this.inputs[i].backward(grads[i]);
+    }
   }
 }
 
@@ -86,7 +101,7 @@ export class Constant extends Op{
 
   backward (grad : Tensor) {
     const grads = this.op.backward(grad);
-    return grads[0]
+    return [ grads[0] ]
   }
 
 }

@@ -22,7 +22,7 @@ describe('Add Op', () => {
     expect(closeEnough(grads[0].numjs(), t.numjs())).toBe(true);
     expect(closeEnough(grads[1].numjs(), t.numjs())).toBe(true);
   });
-})
+});
 
 describe('MatMul Op', () => {
   it('forward should add multiply matrices', () => {
