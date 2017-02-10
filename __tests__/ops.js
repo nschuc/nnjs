@@ -69,4 +69,23 @@ describe('MatMul Op', () => {
     expect(closeEnough(grads[0].numjs(), a_grad.numjs())).toBe(true);
     expect(closeEnough(grads[1].numjs(), b_grad.numjs())).toBe(true);
   });
-})
+});
+
+describe('Constant Op', () => {
+  it('should add constant', () => {
+    let op = new ops.Constant(new ops.Add(), 5);
+    let t1 = new Tensor({ data: matTestData.a });
+    let v3 = op.forward(t1);
+    const res = v3.numjs();
+    expect(closeEnough(res, matTestData.a.add(5))).toBe(true);
+  });
+
+  it('should compute proper gradient', () => {
+    const { a } = matTestData;
+    let op = new ops.Constant(new ops.Add(), 5);
+    let t1 = new Tensor({ data: a });
+    let v3 = op.forward(t1);
+    let grads = op.backward(nn.ones(...a.shape));
+    expect(closeEnough(grads[0].numjs(), nj.ones(a.shape))).toBe(true);
+  });
+});
