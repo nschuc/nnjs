@@ -1,29 +1,29 @@
 //@flow
-import nj, { NdArray } from 'numjs';
+import nj, { NdArray } from "numjs";
 
 class Storage {
   data: nj.array;
 
-  constructor({ data, shape } : { data? : nj.array, shape? : Array<number> }) {
-    this.data = data || nj.zeros(shape, 'float32');
+  constructor({ data, shape }: { data?: nj.array, shape?: Array<number> }) {
+    this.data = data || nj.zeros(shape, "float32");
   }
 
-  transpose(dims: Array<number> = [1, 0]) {
+  transpose(dims: Array<number> = [ 1, 0 ]) {
     return this.data.transpose(dims);
   }
 
-  add(t : Tensor | number) {
-    const data = typeof t == 'number' ? t : t.storage.data;
+  add(t: Tensor | number) {
+    const data = typeof t == "number" ? t : t.storage.data;
     return this.data.add(data);
   }
 
-  mm(t : Tensor | number) {
-    const data = typeof t == 'number' ? t : t.storage.data;
+  mm(t: Tensor | number) {
+    const data = typeof t == "number" ? t : t.storage.data;
     return this.data.dot(data);
   }
 
-  mul(t : Tensor | number) {
-    const data = typeof t == 'number' ? t : t.storage.data;
+  mul(t: Tensor | number) {
+    const data = typeof t == "number" ? t : t.storage.data;
     return this.data.multiply(data);
   }
 
@@ -36,8 +36,10 @@ export default class Tensor {
   shape: Array<number>;
   storage: Storage;
 
-  constructor({ data, shape = [] } : { data? : nj.array, shape? : Array<number> }) {
-    if(data) {
+  constructor(
+    { data, shape = [] }: { data?: nj.array, shape?: Array<number> }
+  ) {
+    if (data) {
       shape = data.shape;
     }
     this.shape = shape;
@@ -52,30 +54,30 @@ export default class Tensor {
     return this.storage.data;
   }
 
-  get T() : Tensor {
+  get T(): Tensor {
     const data = this.storage.transpose();
     return new Tensor({ data });
   }
 
-  static ones(...shape : Array<number>) {
+  static ones(...shape: Array<number>) {
     return new Tensor({ data: nj.ones(shape) });
   }
 
-  static randn(...shape : Array<number>) {
+  static randn(...shape: Array<number>) {
     return new Tensor({ data: nj.random(shape) });
   }
 
-  add(other : Tensor | number) {
+  add(other: Tensor | number) {
     const data = this.storage.add(other);
     return new Tensor({ data });
   }
 
-  mm(other : Tensor) {
+  mm(other: Tensor) {
     const data = this.storage.mm(other);
     return new Tensor({ data });
   }
 
-  mul(other : number | Tensor) {
+  mul(other: number | Tensor) {
     const data = this.storage.mul(other);
     return new Tensor({ data });
   }
