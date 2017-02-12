@@ -2,14 +2,18 @@
 import nj, { NdArray } from "numjs";
 
 class Storage {
-  data: nj.array;
+  _data: nj.array;
 
   constructor({ data, shape }: { data?: nj.array, shape?: Array<number> }) {
-    this.data = data || nj.zeros(shape, "float32");
+    this._data = data || nj.zeros(shape, "float32");
   }
 
   transpose(dims: Array<number> = [ 1, 0 ]) {
     return this.data.transpose(dims);
+  }
+
+  get data() {
+    return this._data;
   }
 
   add(t: Tensor | number) {
@@ -59,14 +63,6 @@ export default class Tensor {
     return new Tensor({ data });
   }
 
-  static ones(...shape: Array<number>) {
-    return new Tensor({ data: nj.ones(shape) });
-  }
-
-  static randn(...shape: Array<number>) {
-    return new Tensor({ data: nj.random(shape) });
-  }
-
   add(other: Tensor | number) {
     const data = this.storage.add(other);
     return new Tensor({ data });
@@ -85,4 +81,17 @@ export default class Tensor {
   norm() {
     return this.storage.norm();
   }
+
+  [Symbol.iterator]() {
+    return this.storage.data.tolist()[Symbol.iterator]();
+  }
+
+  static ones(...shape: Array<number>) {
+    return new Tensor({ data: nj.ones(shape) });
+  }
+
+  static randn(...shape: Array<number>) {
+    return new Tensor({ data: nj.random(shape) });
+  }
 }
+
