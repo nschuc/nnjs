@@ -4,11 +4,26 @@ import nj from "numjs";
 import { closeEnough, matTestData, mmData, normData } from "./data.js";
 
 describe("tensor destructuring", () => {
-  it("should add two tensors", () => {
+  it("should destructure 2 element array", () => {
     let t1 = nn.fromArray([ 1, 2 ]);
     let [ x, y ] = t1;
     expect(x).toEqual(1);
     expect(y).toEqual(2);
+  });
+
+  it("should destructure 3 element array", () => {
+    let t1 = nn.fromArray([ 1, 2, 3 ]);
+    let [ x, y, z ] = t1;
+    expect(x).toEqual(1);
+    expect(y).toEqual(2);
+    expect(z).toEqual(3);
+  });
+
+  it("should destructure nested array", () => {
+    let t1 = nn.fromArray([ [ 1 ], [ 2 ], [ 3 ] ]);
+    let [ x, y ] = t1;
+    expect(x).toEqual([ 1 ]);
+    expect(y).toEqual([ 2 ]);
   });
 });
 
