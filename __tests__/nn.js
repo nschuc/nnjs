@@ -6,16 +6,16 @@ import nj from "numjs";
 
 describe("variable op mixins", () => {
   it("should have an add operation", () => {
-    let t1 = new Variable(new Tensor({ shape: [ 5, 3 ] }));
-    let t2 = new Variable(new Tensor({ shape: [ 5, 3 ] }));
+    let t1 = new Variable(new Tensor(5, 3));
+    let t2 = new Variable(new Tensor(5, 3));
     let t3 = t1.add(t2);
   });
 });
 
 describe("variable addition", () => {
   it("should have an add operation", () => {
-    let t1 = new Tensor({ data: matTestData.a });
-    let t2 = new Tensor({ data: matTestData.b });
+    let t1 = new Tensor(matTestData.a);
+    let t2 = new Tensor(matTestData.b);
 
     let v1 = new Variable(t1);
     let v2 = new Variable(t2);
@@ -25,8 +25,8 @@ describe("variable addition", () => {
   });
 
   it("should have a matmul operation", () => {
-    let W = new Variable(new Tensor({ data: mmData.W }));
-    let x = new Variable(new Tensor({ data: mmData.x }));
+    let W = new Variable(new Tensor(mmData.W));
+    let x = new Variable(new Tensor(mmData.x));
     let y = W.matmul(x);
     expect(closeEnough(y.data.numjs(), mmData.y)).toBe(true);
   });
@@ -40,13 +40,12 @@ describe("variable gradient", () => {
       y = y.mul(2);
     }
 
-    const gradients = nn.fromArray([ 0.1, 1, 0.0001 ]);
+    const gradients = new Tensor([0.1, 1, 0.0001]);
 
     y.backward(gradients);
 
     const grad = x.grad.numjs();
-    const expectedGrad = nj.array([ 102.4, 1024, 0.1024 ]);
+    const expectedGrad = nj.array([102.4, 1024, 0.1024]);
     expect(closeEnough(grad, expectedGrad)).toBe(true);
   });
 });
-

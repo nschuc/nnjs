@@ -45,8 +45,8 @@ export class MatMul extends Op {
   }
 
   backward(grad: Tensor) {
-    let [ t1, t2 ] = this.backwardCache;
-    return [ grad.mm(t2.T), t1.T.mm(grad) ];
+    let [t1, t2] = this.backwardCache;
+    return [grad.mm(t2.T), t1.T.mm(grad)];
   }
 }
 
@@ -56,7 +56,7 @@ export class Add extends Op {
   }
 
   backward(grad: Tensor): Array<Tensor> {
-    return [ grad, grad ];
+    return [grad, grad];
   }
 }
 
@@ -67,8 +67,8 @@ export class Mul extends Op {
   }
 
   backward(grad: Tensor) {
-    let [ t1, t2 ] = this.backwardCache;
-    return [ grad.mul(t2), grad.mul(t1) ];
+    let [t1, t2] = this.backwardCache;
+    return [grad.mul(t2), grad.mul(t1)];
   }
 }
 
@@ -79,8 +79,8 @@ export class Norm extends Op {
   }
 
   backward(grad: Tensor) {
-    let [ t1 ] = this.backwardCache;
-    return [ t1 ];
+    let [t1] = this.backwardCache;
+    return [t1];
   }
 }
 
@@ -99,6 +99,6 @@ export class Constant extends Op {
 
   backward(grad: Tensor) {
     const grads = this.op.backward(grad);
-    return [ grads[0] ];
+    return [grads[0]];
   }
 }

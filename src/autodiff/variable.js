@@ -23,6 +23,12 @@ export default class Variable {
     if (this.creator) this.creator.run_backward(grad);
   }
 
+  *[Symbol.iterator]() {
+    for (let data of this.data) {
+      console.log(data);
+    }
+  }
+
   static _registerOp(name: string, Op) {
     let proto: Object = Variable.prototype;
 

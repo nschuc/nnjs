@@ -5,10 +5,14 @@ class Storage {
   _data: nj.array;
 
   constructor({ data, shape }: { data?: nj.array, shape?: Array<number> }) {
-    this._data = data || nj.zeros(shape, "float32");
+    if (data) {
+      this._data = nj.array(data);
+    } else {
+      this._data = nj.zeros(shape, "float32");
+    }
   }
 
-  transpose(dims: Array<number> = [ 1, 0 ]) {
+  transpose(dims: Array<number> = [1, 0]) {
     return this.data.transpose(dims);
   }
 
@@ -16,9 +20,13 @@ class Storage {
     return this._data;
   }
 
+  get size() {
+    return this.data.shape;
+  }
+
   *[Symbol.iterator]() {
     for (let i = 0; i < this.data.shape[0]; i++) {
-      yield this.data.slice([ i, i + 1 ]);
+      yield this.data.slice([i, i + 1]);
     }
   }
 
@@ -49,21 +57,14 @@ class Storage {
 }
 
 export default class Tensor {
-  shape: Array<number>;
   storage: Storage;
 
-  constructor(
-    { data, shape = [] }: { data?: nj.array, shape?: Array<number> }
-  ) {
-    if (data) {
-      shape = data.shape;
+  constructor(...args: any) {
+    if (args.length == 1) {
+      this.storage = new Storage({ data: args[0] });
+    } else if (args.length > 1) {
+      this.storage = new Storage({ shape: args });
     }
-    this.shape = shape;
-    this.storage = new Storage({ data, shape });
-  }
-
-  shape() {
-    return this.shape;
   }
 
   numjs() {
@@ -72,7 +73,11 @@ export default class Tensor {
 
   get T(): Tensor {
     const data = this.storage.transpose();
-    return new Tensor({ data });
+    return new Tensor(data);
+  }
+
+  get size(): Tensor {
+    return this.storage.data.shape;
   }
 
   *[Symbol.iterator]() {
@@ -80,22 +85,22 @@ export default class Tensor {
   }
 
   select(dim, index) {
-    return new Tensor({ data: this.storage.select(dim, index) });
+    return new Tensor(this.storage.select(dim, index));
   }
 
   add(other: Tensor | number) {
     const data = this.storage.add(other);
-    return new Tensor({ data });
+    return new Tensor(data);
   }
 
   mm(other: Tensor) {
     const data = this.storage.mm(other);
-    return new Tensor({ data });
+    return new Tensor(data);
   }
 
   mul(other: number | Tensor) {
     const data = this.storage.mul(other);
-    return new Tensor({ data });
+    return new Tensor(data);
   }
 
   norm() {
@@ -103,11 +108,10 @@ export default class Tensor {
   }
 
   static ones(...shape: Array<number>) {
-    return new Tensor({ data: nj.ones(shape) });
+    return new Tensor(nj.ones(shape));
   }
 
   static randn(...shape: Array<number>) {
-    return new Tensor({ data: nj.random(shape) });
+    return new Tensor(nj.random(shape));
   }
 }
-
