@@ -16,9 +16,21 @@ class Storage {
     return this._data;
   }
 
+  *[Symbol.iterator]() {
+    for (let i = 0; i < this.data.shape[0]; i++) {
+      yield this.data.slice([ i, i + 1 ]);
+    }
+  }
+
   add(t: Tensor | number) {
     const data = typeof t == "number" ? t : t.storage.data;
     return this.data.add(data);
+  }
+
+  select(dim: number, index: number) {
+    let indices = new Array(this.data.shape.length);
+    indices[dim] = index;
+    return this.data.pick(...indices);
   }
 
   mm(t: Tensor | number) {
@@ -63,6 +75,14 @@ export default class Tensor {
     return new Tensor({ data });
   }
 
+  *[Symbol.iterator]() {
+    yield* this.storage.data.tolist();
+  }
+
+  select(dim, index) {
+    return new Tensor({ data: this.storage.select(dim, index) });
+  }
+
   add(other: Tensor | number) {
     const data = this.storage.add(other);
     return new Tensor({ data });
@@ -80,10 +100,6 @@ export default class Tensor {
 
   norm() {
     return this.storage.norm();
-  }
-
-  [Symbol.iterator]() {
-    return this.storage.data.tolist()[Symbol.iterator]();
   }
 
   static ones(...shape: Array<number>) {

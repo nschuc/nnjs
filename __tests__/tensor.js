@@ -27,6 +27,22 @@ describe("tensor destructuring", () => {
   });
 });
 
+describe("select subtensor", () => {
+  it("should select proper subdimensions", () => {
+    let t1 = nn.fromArray([
+      [ 0, 1, 2, 3 ],
+      [ 4, 5, 6, 7 ],
+      [ 8, 9, 10, 11 ],
+      [ 12, 13, 14, 15 ]
+    ]);
+
+    let h = t1.select(0, 0).numjs();
+    let v = t1.select(1, 1).numjs();
+    expect(h.tolist()).toEqual([ 0, 1, 2, 3 ]);
+    expect(v.tolist()).toEqual([ 1, 5, 9, 13 ]);
+  });
+});
+
 describe("tensor addition", () => {
   it("should create a third tensor with same shape", () => {
     let t1 = new Tensor({ shape: [ 5, 3 ] });
