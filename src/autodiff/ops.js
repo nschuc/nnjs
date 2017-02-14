@@ -60,6 +60,16 @@ export class Add extends Op {
   }
 }
 
+export class Sub extends Op {
+  forward(t1: Tensor, t2: Tensor | number) {
+    return t1.sub(t2);
+  }
+
+  backward(grad: Tensor): Array<Tensor> {
+    return [grad, grad.neg()];
+  }
+}
+
 export class Mul extends Op {
   forward(t1: Tensor, t2: Tensor | number) {
     this.cacheForBackward(t1, t2);
@@ -72,6 +82,19 @@ export class Mul extends Op {
   }
 }
 
+export class Pow extends Op {
+  forward(t1: Tensor, p: number) {
+    this.cacheForBackward(t1);
+    this.p = p;
+    return t1.pow(p);
+  }
+
+  backward(grad: Tensor) {
+    let [t1] = this.backwardCache;
+    return [grad.mul(this.p).mul(t1.pow(this.p - 1))];
+  }
+}
+
 export class Norm extends Op {
   forward(t1: Tensor) {
     this.cacheForBackward(t1);
@@ -81,6 +104,16 @@ export class Norm extends Op {
   backward(grad: Tensor) {
     let [t1] = this.backwardCache;
     return [t1];
+  }
+}
+
+export class Neg extends Op {
+  forward(t1: Tensor) {
+    return t1.neg();
+  }
+
+  backward(grad: Tensor) {
+    return grad.neg();
   }
 }
 

@@ -35,6 +35,11 @@ class Storage {
     return this.data.add(data);
   }
 
+  sub(t: Tensor | number) {
+    const data = typeof t == "number" ? t : t.storage.data;
+    return this.data.subtract(data);
+  }
+
   select(dim: number, index: number) {
     let indices = new Array(this.data.shape.length);
     indices[dim] = index;
@@ -51,8 +56,16 @@ class Storage {
     return this.data.multiply(data);
   }
 
+  pow(p: number) {
+    return nj.power(this.data, 2);
+  }
+
   norm() {
     return Math.sqrt(nj.power(this.data, 2).sum());
+  }
+
+  neg() {
+    return this.data.negative();
   }
 }
 
@@ -93,6 +106,11 @@ export default class Tensor {
     return new Tensor(data);
   }
 
+  sub(other: Tensor | number) {
+    const data = this.storage.sub(other);
+    return new Tensor(data);
+  }
+
   mm(other: Tensor) {
     const data = this.storage.mm(other);
     return new Tensor(data);
@@ -103,8 +121,18 @@ export default class Tensor {
     return new Tensor(data);
   }
 
+  pow(other: number) {
+    const data = this.storage.pow(other);
+    return new Tensor(data);
+  }
+
   norm() {
     return this.storage.norm();
+  }
+
+  neg() {
+    const data = this.storage.neg();
+    return new Tensor(data);
   }
 
   static ones(...shape: Array<number>) {
