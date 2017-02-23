@@ -54,3 +54,8 @@ export default class Variable {
     };
   }
 }
+
+Variable.prototype.toString = function() {
+  return `Variable with 
+    ${this.data.toString()}`;
+};

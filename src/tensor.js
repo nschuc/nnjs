@@ -67,6 +67,14 @@ class Storage {
   neg() {
     return this.data.negative();
   }
+
+  zero_() {
+    this._data = nj.zeros(this.data.shape);
+  }
+
+  toString() {
+    return this.data.toString();
+  }
 }
 
 export default class Tensor {
@@ -133,6 +141,15 @@ export default class Tensor {
   neg() {
     const data = this.storage.neg();
     return new Tensor(data);
+  }
+
+  zero_() {
+    this.storage.zero_();
+    return this;
+  }
+
+  toString() {
+    return this.storage.toString();
   }
 
   static ones(...shape: Array<number>) {
