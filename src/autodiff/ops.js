@@ -113,7 +113,7 @@ export class Neg extends Op {
   }
 
   backward(grad: Tensor) {
-    return grad.neg();
+    return [grad.neg()];
   }
 }
 
