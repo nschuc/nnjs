@@ -29,12 +29,22 @@ class Storage {
     return this.data.add(data);
   }
 
+  add_(t: Tensor | number) {
+    const data = typeof t == "number" ? t : t.storage.data;
+    this.data.add(data, false);
+    return this;
+  }
+
   sub(t: Tensor | number) {
     const data = typeof t == "number" ? t : t.storage.data;
     return this.data.subtract(data);
   }
 
   select(dim: number, index: number) {
+    if(this.size.length === 1) {
+      return this.data.lo(index).hi(Math.min(this.size[0] - 1, index + 1));
+    }
+
     let indices = new Array(this.data.shape.length);
     indices[dim] = index;
     return this.data.pick(...indices);
@@ -54,6 +64,10 @@ class Storage {
     return nj.power(this.data, 2);
   }
 
+  dist(t: Tensor) {
+    return Math.sqrt(nj.power(this.data.subtract(t.storage.data), 2).sum());
+  }
+
   norm() {
     return Math.sqrt(nj.power(this.data, 2).sum());
   }
@@ -63,7 +77,12 @@ class Storage {
   }
 
   zero_() {
-    this._data = nj.zeros(this.data.shape);
+    this._data.assign(0);
+  }
+
+  set_index_(index : number, t : Tensor) {
+    let sub = this._data.lo(index).hi(Math.min(this.size[0] - 1, index + 1));
+    sub.assign(t.list(), false)
   }
 
   toString() {
@@ -86,13 +105,17 @@ export default class Tensor {
     return this.storage.data;
   }
 
+  list() {
+    return this.storage.data.tolist();
+  }
+
   get T(): Tensor {
     const data = this.storage.transpose();
     return new Tensor(data);
   }
 
   get size(): Tensor {
-    return this.storage.data.shape;
+    return this.storage.size;
   }
 
   *[Symbol.iterator]() {
@@ -103,9 +126,18 @@ export default class Tensor {
     return new Tensor(this.storage.select(dim, index));
   }
 
+  index(index) {
+    return this.select(0, index);
+  }
+
   add(other: Tensor | number) {
     const data = this.storage.add(other);
     return new Tensor(data);
+  }
+
+  add_(other: Tensor | number) {
+    this.storage.add_(other);
+    return this;
   }
 
   sub(other: Tensor | number) {
@@ -122,7 +154,7 @@ export default class Tensor {
     const data = this.storage.mul(other);
     return new Tensor(data);
   }
-
+ 
   pow(other: number) {
     const data = this.storage.pow(other);
     return new Tensor(data);
@@ -130,6 +162,10 @@ export default class Tensor {
 
   norm() {
     return this.storage.norm();
+  }
+
+  dist(other : Tensor) {
+    return this.storage.dist(other);
   }
 
   neg() {
@@ -142,8 +178,14 @@ export default class Tensor {
     return this;
   }
 
-  toString() {
-    return this.storage.toString();
+  set_index_(index: number, t : Tensor) {
+    this.storage.set_index_(index, t);
+    return this;
+  }
+
+
+  static zeros(...shape: Array<number>) {
+    return new Tensor(nj.zeros(shape));
   }
 
   static ones(...shape: Array<number>) {
@@ -154,3 +196,9 @@ export default class Tensor {
     return new Tensor(nj.random(shape));
   }
 }
+
+Tensor.prototype.toString = function() {
+  return `${this.storage.toString()}\n\t[Tensor with size ${this.size.join('x')}]`;
+};
+
+//Tensor.prototype.inspect = Tensor.prototype.toString;
