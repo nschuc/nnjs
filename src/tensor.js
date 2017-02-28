@@ -24,12 +24,6 @@ class Storage {
     return this.data.shape;
   }
 
-  *[Symbol.iterator]() {
-    for (let i = 0; i < this.data.shape[0]; i++) {
-      yield this.data.slice([i, i + 1]);
-    }
-  }
-
   add(t: Tensor | number) {
     const data = typeof t == "number" ? t : t.storage.data;
     return this.data.add(data);
