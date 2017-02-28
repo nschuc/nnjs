@@ -1,8 +1,8 @@
 // @flow
 import Tensor from "./src/tensor.js";
-import nj from "numjs";
+import optim from "./src/optim";
 
 const randn = Tensor.randn;
 const ones = Tensor.ones;
 
-export default { Tensor, randn, ones };
+export default { Tensor, randn, ones, optim };
