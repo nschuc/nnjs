@@ -36,10 +36,34 @@ describe("select subtensor", () => {
       [12, 13, 14, 15]
     ]);
 
-    let h = t1.select(0, 0).numjs();
-    let v = t1.select(1, 1).numjs();
+    let h = t1.select(0, 0);
+    let v = t1.select(1, 1);
+    expect(h.list()).toEqual([0, 1, 2, 3]);
+    expect(v.list()).toEqual([1, 5, 9, 13]);
+  });
+});
+
+describe("index into tensor", () => {
+  it("should index into 1-D tensor", () => {
+    let t1 = new Tensor([1.5, 1.5]);
+    let first = t1.index(0);
+    let second = t1.index(1);
+    expect(first.list()).toEqual([1.5]);
+    expect(second.list()).toEqual([1.5]);
+  });
+
+  it("should index into 2-D tensor", () => {
+    let t1 = new Tensor([
+      [0, 1, 2, 3],
+      [4, 5, 6, 7],
+      [8, 9, 10, 11],
+      [12, 13, 14, 15]
+    ]);
+
+    let h = t1.index(0).numjs();
+    let v = t1.index(1).numjs();
     expect(h.tolist()).toEqual([0, 1, 2, 3]);
-    expect(v.tolist()).toEqual([1, 5, 9, 13]);
+    expect(v.tolist()).toEqual([4, 5, 6, 7]);
   });
 });
 
