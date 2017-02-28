@@ -89,3 +89,41 @@ describe("Constant Op", () => {
     expect(closeEnough(grads[0].numjs(), nj.ones(a.shape))).toBe(true);
   });
 });
+
+describe("Constant Op", () => {
+  it("should add constant", () => {
+    let op = new ops.Constant(new ops.Add(), 5);
+    let t1 = new Tensor(matTestData.a);
+    let v3 = op.forward(t1);
+    const res = v3.numjs();
+    expect(closeEnough(res, matTestData.a.add(5))).toBe(true);
+  });
+
+  it("should compute proper gradient", () => {
+    const { a } = matTestData;
+    let op = new ops.Constant(new ops.Add(), 5);
+    let t1 = new Tensor(a);
+    let v3 = op.forward(t1);
+    let grads = op.backward(nn.ones(...a.shape));
+    expect(closeEnough(grads[0].numjs(), nj.ones(a.shape))).toBe(true);
+  });
+});
+
+describe("Index Op", () => {
+  it("should add constant", () => {
+    let op1 = new ops.Index(0);
+    let op2 = new ops.Index(1);
+    let t = new Tensor([1.5, 3.5]);
+    expect(op1.forward(t).list()).toEqual([1.5]);
+    expect(op2.forward(t).list()).toEqual([3.5]);
+  });
+
+  it("should compute proper gradient", () => {
+    const { a } = matTestData;
+    let op = new ops.Constant(new ops.Add(), 5);
+    let t1 = new Tensor(a);
+    let v3 = op.forward(t1);
+    let grads = op.backward(nn.ones(...a.shape));
+    expect(closeEnough(grads[0].numjs(), nj.ones(a.shape))).toBe(true);
+  });
+});

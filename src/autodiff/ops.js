@@ -135,3 +135,36 @@ export class Constant extends Op {
     return [grads[0]];
   }
 }
+
+export class Index extends Op {
+  index: number;
+  constructor(index: number) {
+    super();
+    this.index = index;
+  }
+
+  forward(t1: Tensor) {
+    this.size = t1.size;
+    return t1.index(this.index);
+  }
+
+  backward(grad: Tensor) {
+    let input_grad = Tensor.zeros(...this.size);
+    input_grad.set_index_(this.index, grad);
+    return [input_grad];
+  }
+}
+
+export class Dist extends Op {
+  constructor() {
+    super();
+  }
+
+  forward(t1: Tensor, t2: Tensor) {
+    return t1.dist(t2);
+  }
+
+  backward(grad: Tensor) {
+    throw "Backward not implemented!"
+  }
+}
