@@ -21,10 +21,8 @@ describe("SGD test", () => {
       opt.zero_grad();
       let loss = rosenbrock(params);
       loss.backward();
-      console.log(params);
       opt.step();
     }
-    console.log(params);
     const loss = params.dist(soln);
     expect(loss.data).toBeLessThan(initial_loss.data);
   });
