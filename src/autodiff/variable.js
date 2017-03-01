@@ -18,7 +18,6 @@ export default class Variable {
   }
 
   backward(grad: Tensor = Tensor.ones(1)) {
-    this.grad = grad;
     differentiate([this], grad);
   }
 
