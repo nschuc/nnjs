@@ -34,7 +34,7 @@ describe("variable addition", () => {
 
 describe("variable gradient", () => {
   it("should have grad set when backward is called", () => {
-    let x = new Variable(nn.ones(3));
+    let x = new Variable(Tensor.ones(3));
     let y = x.mul(2);
     while (y.data.norm() < 1000) {
       y = y.mul(2);
@@ -44,8 +44,8 @@ describe("variable gradient", () => {
 
     y.backward(gradients);
 
-    const grad = x.grad.numjs();
-    const expectedGrad = nj.array([102.4, 1024, 0.1024]);
-    expect(closeEnough(grad, expectedGrad)).toBe(true);
+    const grad = x.grad.list();
+    const expectedGrad = [102.4, 1024, 0.1024];
+    expect(grad).toEqual(expectedGrad);
   });
 });

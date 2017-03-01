@@ -24,6 +24,25 @@ describe("Add Op", () => {
   });
 });
 
+describe("Sub Op", () => {
+  it("should add two tensors", () => {
+    let op = new ops.Sub();
+    let t1 = new Tensor(matTestData.a);
+    let t2 = new Tensor(matTestData.b);
+    let v3 = op.forward(t1, t2);
+    const res = v3.numjs();
+    expect(closeEnough(res, matTestData.a_sub_b)).toBe(true);
+  });
+
+  it("should compute proper gradient", () => {
+    let op = new ops.Sub();
+    let t = nn.randn(3, 3);
+    let grads = op.backward(t);
+    expect(grads[0].dist(t)).toBeLessThan(1e-3);
+    expect(grads[1].dist(t.neg())).toBeLessThan(1e-3);
+  });
+});
+
 describe("MatMul Op", () => {
   it("forward should add multiply matrices", () => {
     let op = new ops.MatMul();
@@ -80,7 +99,7 @@ describe("Constant Op", () => {
     expect(closeEnough(res, matTestData.a.add(5))).toBe(true);
   });
 
-  it("should compute proper gradient", () => {
+  it("should compute Add gradient", () => {
     const { a } = matTestData;
     let op = new ops.Constant(new ops.Add(), 5);
     let t1 = new Tensor(a);
@@ -91,21 +110,22 @@ describe("Constant Op", () => {
 });
 
 describe("Constant Op", () => {
-  it("should add constant", () => {
-    let op = new ops.Constant(new ops.Add(), 5);
-    let t1 = new Tensor(matTestData.a);
-    let v3 = op.forward(t1);
-    const res = v3.numjs();
-    expect(closeEnough(res, matTestData.a.add(5))).toBe(true);
+  it("should compute pow", () => {
+    let op = new ops.Constant(new ops.Pow(), 2);
+    const t1 = new Tensor(matTestData.a);
+    const res = op.forward(t1);
+    const expected = new Tensor(matTestData.a_pow_2);
+    expect(res.dist(expected)).toBeLessThan(1e-3);
   });
 
-  it("should compute proper gradient", () => {
+  it("should compute Pow gradient", () => {
     const { a } = matTestData;
-    let op = new ops.Constant(new ops.Add(), 5);
+    let op = new ops.Constant(new ops.Pow(), 2);
     let t1 = new Tensor(a);
-    let v3 = op.forward(t1);
-    let grads = op.backward(nn.ones(...a.shape));
-    expect(closeEnough(grads[0].numjs(), nj.ones(a.shape))).toBe(true);
+    op.forward(t1);
+    let grads = op.backward(Tensor.ones(...a.shape));
+    const expected = new Tensor(matTestData.a_pow_grad);
+    expect(grads[0].dist(expected)).toBeLessThan(1e-3);
   });
 });
 

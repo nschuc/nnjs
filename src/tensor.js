@@ -61,7 +61,7 @@ class Storage {
   }
 
   pow(p: number) {
-    return nj.power(this.data, 2);
+    return nj.power(this.data, p);
   }
 
   dist(t: Tensor) {
@@ -201,4 +201,4 @@ Tensor.prototype.toString = function() {
   return `${this.storage.toString()}\n\t[Tensor with size ${this.size.join('x')}]`;
 };
 
-//Tensor.prototype.inspect = Tensor.prototype.toString;
+Tensor.prototype.inspect = Tensor.prototype.toString;

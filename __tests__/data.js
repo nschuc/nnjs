@@ -13,6 +13,7 @@ export const matTestData = {
   a_plus_b: nj.array([[1, 1.3], [2, 1], [7.7, 16]]),
   a_sub_b: nj.array([[-1, -3.3], [0, -1], [1.7, 8]]),
   a_pow_2: nj.array([[0, 1], [1, 0], [22.09, 144]]),
+  a_pow_grad: nj.array([[0.0, -2.0], [2.0, 0.0], [9.4, 24.0]]),
 }
 
 export const mmData = {
