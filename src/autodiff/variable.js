@@ -59,3 +59,5 @@ Variable.prototype.toString = function() {
   return `Variable with 
     ${this.data.toString()}`;
 };
+
+Variable.prototype.inspect = Variable.prototype.toString;
