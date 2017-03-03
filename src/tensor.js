@@ -77,7 +77,7 @@ class Storage {
   }
 
   zero_() {
-    this._data.assign(0);
+    this._data.assign(0, false);
   }
 
   set_index_(index : number, t : Tensor) {

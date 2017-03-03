@@ -100,6 +100,14 @@ describe("matrix multiplication", () => {
   });
 });
 
+describe("in-place zero", () => {
+  it("should zero out all entries", () => {
+    let x = Tensor.ones(3, 3);
+    x.zero_()
+    expect(x.list()).toEqual(Tensor.zeros(3,3).list());
+  });
+});
+
 describe("norm", () => {
   it("should compute norm", () => {
     let x = new Tensor(normData.x);
