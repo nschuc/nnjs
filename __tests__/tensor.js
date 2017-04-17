@@ -115,3 +115,11 @@ describe("norm", () => {
     expect(x.norm()).toBeCloseTo(testData.norm.y);
   });
 });
+
+describe("sigmoid", () => {
+  it("should compute sigmoid", () => {
+    let x = new Tensor(testData.sigmoid.x);
+    let y = x.sigmoid()
+    expect(closeEnough(y.numjs(), testData.sigmoid.y));
+  });
+});

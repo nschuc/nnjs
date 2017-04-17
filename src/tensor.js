@@ -72,6 +72,11 @@ export default class Tensor {
     return new Tensor(data);
   }
 
+  sigmoid() {
+    const data = this.storage.sigmoid();
+    return new Tensor(data);
+  }
+
   norm() {
     return this.storage.norm();
   }
@@ -94,7 +99,6 @@ export default class Tensor {
     this.storage.set_index_(index, t);
     return this;
   }
-
 
   static zeros(...shape: Array<number>) {
     return new Tensor(nj.zeros(shape));

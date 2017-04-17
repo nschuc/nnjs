@@ -63,6 +63,10 @@ export default class Storage {
     return nj.power(this.data, p);
   }
 
+  sigmoid() {
+    return nj.sigmoid(this.data);
+  }
+
   dist(t: Tensor) {
     return Math.sqrt(nj.power(this.data.subtract(t.storage.data), 2).sum());
   }

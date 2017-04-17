@@ -117,6 +117,20 @@ export class Neg extends Op {
   }
 }
 
+export class Sigmoid extends Op {
+  forward(t: Tensor) {
+    const y = t.sigmoid();
+    this.cacheForBackward(y);
+    return y;
+  }
+
+  backward(grad: Tensor) {
+    let [t1] = this.backwardCache;
+    let grad_in = t1.mul(t1.neg().add(1));
+    return [ grad.mul(grad_in) ];
+  }
+}
+
 export class Constant extends Op {
   value: number;
   op: Op;

@@ -91,6 +91,24 @@ describe("MatMul Op", () => {
   });
 });
 
+describe("Sigmoid Op", () => {
+  it("forward should compute sigmoid of tensor", () => {
+    let op = new ops.Sigmoid();
+    let t1 = new Tensor(testData.sigmoid.x);
+    let v3 = op.forward(t1);
+    const res = v3.numjs();
+    expect(closeEnough(res, testData.sigmoid.y));
+  });
+
+  it("should compute Sigmoid gradient", () => {
+    let op = new ops.Sigmoid();
+    let t1 = new Tensor(testData.sigmoid.x);
+    let v3 = op.forward(t1);
+    let grads = op.backward(nn.ones(...testData.sigmoid.x.shape));
+    expect(closeEnough(grads[0].numjs(), testData.sigmoid.grad)).toBe(true);
+  });
+});
+
 describe("Constant Op", () => {
   it("should add constant", () => {
     let op = new ops.Constant(new ops.Add(), 5);
