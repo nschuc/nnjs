@@ -1,6 +1,7 @@
 import Tensor from "../src/tensor.js";
 import { Variable } from "../src/autodiff";
-import { closeEnough, matTestData, mmData } from "./data.js";
+import { closeEnough } from "./data.js";
+import * as testData from "./data.js";
 import nn from "../";
 import nj from "numjs";
 
@@ -14,21 +15,21 @@ describe("variable op mixins", () => {
 
 describe("variable addition", () => {
   it("should have an add operation", () => {
-    let t1 = new Tensor(matTestData.a);
-    let t2 = new Tensor(matTestData.b);
+    let t1 = new Tensor(testData.matrix.a);
+    let t2 = new Tensor(testData.matrix.b);
 
     let v1 = new Variable(t1);
     let v2 = new Variable(t2);
     let v3 = v1.add(v2);
     const res = v3.data.numjs();
-    expect(closeEnough(res, matTestData.a_plus_b)).toBe(true);
+    expect(closeEnough(res, testData.matrix.a_plus_b)).toBe(true);
   });
 
   it("should have a matmul operation", () => {
-    let W = new Variable(new Tensor(mmData.W));
-    let x = new Variable(new Tensor(mmData.x));
+    let W = new Variable(new Tensor(testData.matmul.W));
+    let x = new Variable(new Tensor(testData.matmul.x));
     let y = W.matmul(x);
-    expect(closeEnough(y.data.numjs(), mmData.y)).toBe(true);
+    expect(closeEnough(y.data.numjs(), testData.matmul.y)).toBe(true);
   });
 });
 

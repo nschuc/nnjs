@@ -1,7 +1,8 @@
 import Tensor from "../src/tensor.js";
 import nn from "../";
 import nj from "numjs";
-import { closeEnough, matTestData, mmData, normData } from "./data.js";
+import { closeEnough } from "./data.js";
+import * as testData from "./data.js";
 
 describe("tensor destructuring", () => {
   it("should destructure 2 element array", () => {
@@ -76,27 +77,27 @@ describe("tensor addition", () => {
   });
 
   it("should add two tensors", () => {
-    let t1 = new Tensor(matTestData.a);
-    let t2 = new Tensor(matTestData.b);
+    let t1 = new Tensor(testData.matrix.a);
+    let t2 = new Tensor(testData.matrix.b);
     let t3 = t1.add(t2);
     const res = t3.numjs();
-    expect(closeEnough(res, matTestData.a_plus_b)).toBe(true);
+    expect(closeEnough(res, testData.matrix.a_plus_b)).toBe(true);
   });
 });
 
 describe("matrix multiplication", () => {
   it("should create a third tensor with proper shape", () => {
-    let W = new Tensor(mmData.W);
-    let x = new Tensor(mmData.x);
+    let W = new Tensor(testData.matmul.W);
+    let x = new Tensor(testData.matmul.x);
     let y = W.mm(x);
     expect(y.size).toEqual([3, 3]);
   });
 
   it("should multiply two matrices", () => {
-    let W = new Tensor(mmData.W);
-    let x = new Tensor(mmData.x);
+    let W = new Tensor(testData.matmul.W);
+    let x = new Tensor(testData.matmul.x);
     let y = W.mm(x);
-    expect(closeEnough(y.numjs(), mmData.y)).toBe(true);
+    expect(closeEnough(y.numjs(), testData.matmul.y)).toBe(true);
   });
 });
 
@@ -110,7 +111,7 @@ describe("in-place zero", () => {
 
 describe("norm", () => {
   it("should compute norm", () => {
-    let x = new Tensor(normData.x);
-    expect(x.norm()).toBeCloseTo(normData.norm);
+    let x = new Tensor(testData.norm.x);
+    expect(x.norm()).toBeCloseTo(testData.norm.y);
   });
 });

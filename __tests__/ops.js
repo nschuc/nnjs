@@ -3,16 +3,17 @@ import nj from "numjs";
 import Tensor from "../src/tensor.js";
 import nn from "../";
 import * as ops from "../src/autodiff/ops.js";
-import { closeEnough, matTestData, mmData } from "./data.js";
+import { closeEnough } from "./data";
+import * as testData from "./data";
 
 describe("Add Op", () => {
   it("should add two tensors", () => {
     let op = new ops.Add();
-    let t1 = new Tensor(matTestData.a);
-    let t2 = new Tensor(matTestData.b);
+    let t1 = new Tensor(testData.matrix.a);
+    let t2 = new Tensor(testData.matrix.b);
     let v3 = op.forward(t1, t2);
     const res = v3.numjs();
-    expect(closeEnough(res, matTestData.a_plus_b)).toBe(true);
+    expect(closeEnough(res, testData.matrix.a_plus_b)).toBe(true);
   });
 
   it("should compute proper gradient", () => {
@@ -27,11 +28,11 @@ describe("Add Op", () => {
 describe("Sub Op", () => {
   it("should add two tensors", () => {
     let op = new ops.Sub();
-    let t1 = new Tensor(matTestData.a);
-    let t2 = new Tensor(matTestData.b);
+    let t1 = new Tensor(testData.matrix.a);
+    let t2 = new Tensor(testData.matrix.b);
     let v3 = op.forward(t1, t2);
     const res = v3.numjs();
-    expect(closeEnough(res, matTestData.a_sub_b)).toBe(true);
+    expect(closeEnough(res, testData.matrix.a_sub_b)).toBe(true);
   });
 
   it("should compute proper gradient", () => {
@@ -46,11 +47,11 @@ describe("Sub Op", () => {
 describe("MatMul Op", () => {
   it("forward should add multiply matrices", () => {
     let op = new ops.MatMul();
-    let t1 = new Tensor(mmData.W);
-    let t2 = new Tensor(mmData.x);
+    let t1 = new Tensor(testData.matmul.W);
+    let t2 = new Tensor(testData.matmul.x);
     let v3 = op.forward(t1, t2);
     const res = v3.numjs();
-    expect(closeEnough(res, mmData.y)).toBe(true);
+    expect(closeEnough(res, testData.matmul.y)).toBe(true);
   });
 
   it("should compute proper gradient", () => {
@@ -93,14 +94,14 @@ describe("MatMul Op", () => {
 describe("Constant Op", () => {
   it("should add constant", () => {
     let op = new ops.Constant(new ops.Add(), 5);
-    let t1 = new Tensor(matTestData.a);
+    let t1 = new Tensor(testData.matrix.a);
     let v3 = op.forward(t1);
     const res = v3.numjs();
-    expect(closeEnough(res, matTestData.a.add(5))).toBe(true);
+    expect(closeEnough(res, testData.matrix.a.add(5))).toBe(true);
   });
 
   it("should compute Add gradient", () => {
-    const { a } = matTestData;
+    const { a } = testData.matrix;
     let op = new ops.Constant(new ops.Add(), 5);
     let t1 = new Tensor(a);
     let v3 = op.forward(t1);
@@ -112,19 +113,19 @@ describe("Constant Op", () => {
 describe("Constant Op", () => {
   it("should compute pow", () => {
     let op = new ops.Constant(new ops.Pow(), 2);
-    const t1 = new Tensor(matTestData.a);
+    const t1 = new Tensor(testData.matrix.a);
     const res = op.forward(t1);
-    const expected = new Tensor(matTestData.a_pow_2);
+    const expected = new Tensor(testData.matrix.a_pow_2);
     expect(res.dist(expected)).toBeLessThan(1e-3);
   });
 
   it("should compute Pow gradient", () => {
-    const { a } = matTestData;
+    const { a } = testData.matrix;
     let op = new ops.Constant(new ops.Pow(), 2);
     let t1 = new Tensor(a);
     op.forward(t1);
     let grads = op.backward(Tensor.ones(...a.shape));
-    const expected = new Tensor(matTestData.a_pow_grad);
+    const expected = new Tensor(testData.matrix.a_pow_grad);
     expect(grads[0].dist(expected)).toBeLessThan(1e-3);
   });
 });
@@ -139,7 +140,7 @@ describe("Index Op", () => {
   });
 
   it("should compute proper gradient", () => {
-    const { a } = matTestData;
+    const { a } = testData.matrix;
     let op = new ops.Constant(new ops.Add(), 5);
     let t1 = new Tensor(a);
     let v3 = op.forward(t1);
